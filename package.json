@@ -9,7 +9,7 @@
     "build": "tsc -b && vite build",
     "test": "vitest",
     "preview": "vite preview",
-    "predeploy": "pnpm run deploy",
+    "predeploy": "pnpm run build",
     "deploy": "pnpm run build && gh-pages -d dist"
   },
   "dependencies": {
