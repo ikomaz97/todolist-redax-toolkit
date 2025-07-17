@@ -2,7 +2,7 @@ name: Deploy Vite App to GitHub Pages
 
 on:
   push:
-    branches: [ "main" ] # Триггер на коммиты в main
+    branches: [ "gh-pages" ] # Триггер на коммиты в main
 
 jobs:
   deploy:
