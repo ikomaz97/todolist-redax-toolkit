@@ -1,31 +1,11 @@
-name: Deploy Vite App to GitHub Pages
-
-on:
-  push:
-    branches: [ "main" ] # Триггер на коммиты в main
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    
-    steps:
-      - uses: actions/checkout@v4
-        
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          
-      - name: Install dependencies
-        run: npm install
-        
-      - name: Build project
-        run: npm run build
-        
-      - name: Deploy to gh-pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          publish_branch: gh-pages # Явно указываем ветку
-          keep_files: false # Очищать ветку перед деплоем
+- name: Deploy
+  run: |
+    git config --global user.name "GitHub Actions"
+    git config --global user.email "actions@github.com"
+    git clone --branch gh-pages https://github.com/ikomaz97/todolist-redax-toolkit.git gh-pages
+    rm -rf gh-pages/*
+    cp -r dist/* gh-pages/
+    cd gh-pages
+    git add .
+    git commit -m "Update: $(date)"
+    git push
