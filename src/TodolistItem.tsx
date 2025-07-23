@@ -7,7 +7,7 @@ type Props = {
     deleteTask: (taskId: number) => void
 }
 
-export const TodolistItem = ({title, tasks}: Props) => {
+export const TodolistItem = ({title, tasks, deleteTask}: Props) => {
   return (
       <div>
         <h3>{title}</h3>
@@ -24,14 +24,14 @@ export const TodolistItem = ({title, tasks}: Props) => {
                     <li key={task.id}>
                       <input type="checkbox" checked={task.isDone} />
                       <span>{task.title}</span>
-                        <button onClick={() => alert(task.id)}>x</button>
+                        <button onClick={() => deleteTask(task.id)}>x</button>
                     </li>
                 )
               })}
             </ul>
         )}
         <div>
-          <Button title={'All++'} />
+          <Button title={'All'} />
           <Button title={'Active'} />
           <Button title={'Completed'} />
         </div>
