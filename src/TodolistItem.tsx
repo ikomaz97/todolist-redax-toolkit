@@ -31,7 +31,7 @@ export const TodolistItem = ({title, tasks}: Props) => {
             </ul>
         )}
         <div>
-          <Button title={'AllLLL'} />
+          <Button title={'All'} />
           <Button title={'Active'} />
           <Button title={'Completed'} />
         </div>
