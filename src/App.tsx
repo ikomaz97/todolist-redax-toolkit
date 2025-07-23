@@ -2,6 +2,8 @@ import './App.css'
 import {TodolistItem} from './TodolistItem'
 import {useState} from "react";
 
+export type FilterValues = 'all' | 'active' | 'completed'
+
 export type Task = {
   id: number
   title: string
@@ -9,7 +11,7 @@ export type Task = {
 }
 
 export const App = () => {
-  const [filter, setFilter] = useState('all')
+  const [filter, changeFilter] = useState<FilterValues>('all')
   const [tasks, setTasks] = useState<Task[]>([
     { id: 1, title: 'HTML&CSS', isDone: true },
     { id: 2, title: 'JS', isDone: true },
@@ -38,7 +40,9 @@ export const App = () => {
       <div className="app">
         <TodolistItem title="What to learn"
                       tasks={filteredTasks}
-                      deleteTask={deleteTask}/>
+                      deleteTask={deleteTask}
+                      changeFilter={changeFilter}
+        />
       </div>
   )
 }
