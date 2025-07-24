@@ -15,8 +15,10 @@ export const TodolistItem = ({title, tasks, deleteTask, changeFilter, createTask
     const [taskTitle, setTaskTitle] = useState('')
 
     const createTaskHandler = () => {
-        createTask(taskTitle)
-        setTaskTitle('')
+        if (taskTitle.trim()) {
+            createTask(taskTitle)
+            setTaskTitle('')
+        }
     }
 
     const changeTaskTitleHandler = (event: ChangeEvent<HTMLInputElement>) => {
@@ -33,10 +35,12 @@ export const TodolistItem = ({title, tasks, deleteTask, changeFilter, createTask
         <div>
             <h3>{title}</h3>
             <div>
-                <input value={taskTitle}
-                       onChange={changeTaskTitleHandler}
-                       onKeyDown={createTaskOnEnterHandler}/>
-
+                <input
+                    value={taskTitle}
+                    onChange={changeTaskTitleHandler}
+                    onKeyDown={createTaskOnEnterHandler}
+                />
+                <Button title={'+'} onClick={createTaskHandler} />
             </div>
             {tasks.length === 0 ? (
                 <p>Тасок нет</p>
