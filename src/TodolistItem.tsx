@@ -4,7 +4,7 @@ import {Button} from './Button'
 type Props = {
   title: string,
   tasks: Task[],
-  deleteTask: (taskId: number) => void,
+  deleteTask: (taskId: string) => void,
     onClick?: () => void
     changeFilter: (filter: FilterValues) => void,
 }
