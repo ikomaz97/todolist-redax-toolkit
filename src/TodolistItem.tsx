@@ -43,20 +43,24 @@ export const TodolistItem = ({title, tasks, deleteTask, changeFilter, createTask
             ) : (
                 <ul>
                     {tasks.map(task => {
+                        const deleteTaskHandler = () => {
+                            deleteTask(task.id)
+                        }
+
                         return (
                             <li key={task.id}>
                                 <input type="checkbox" checked={task.isDone}/>
                                 <span>{task.title}</span>
-                                <Button title={'x'} onClick={() => deleteTask(task.id)}/>
+                                <Button title={'x'} onClick={deleteTaskHandler} />
                             </li>
                         )
                     })}
                 </ul>
             )}
             <div>
-                <Button title={'All'} onClick={() => changeFilter('all')}/>
-                <Button title={'Active'} onClick={() => changeFilter('active')}/>
-                <Button title={'Completed'} onClick={() => changeFilter('completed')}/>
+                <Button title={'All'} onClick={() => changeFilter('All')}/>
+                <Button title={'Active'} onClick={() => changeFilter('Active')}/>
+                <Button title={'Completed'} onClick={() => changeFilter('Completed')}/>
             </div>
         </div>
     )
