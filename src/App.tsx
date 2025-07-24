@@ -26,6 +26,10 @@ export const App = () => {
     setTasks(filteredTasks)
   }
 
+  const createTask = () => {
+    alert('Создание таски')
+  }
+
   let filteredTasks = tasks
   if (filter === 'active') {
     filteredTasks = tasks.filter(task => !task.isDone)
@@ -40,6 +44,7 @@ export const App = () => {
                       tasks={filteredTasks}
                       deleteTask={deleteTask}
                       changeFilter={changeFilter}
+                      createTask={createTask}
         />
       </div>
   )
