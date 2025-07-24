@@ -1,6 +1,6 @@
 import type {FilterValues, Task} from './App'
 import {Button} from './Button'
-import {useRef} from 'react'
+import { useState} from 'react'
 
 type Props = {
     title: string,
@@ -12,18 +12,22 @@ type Props = {
 }
 
 export const TodolistItem = ({title, tasks, deleteTask, changeFilter, createTask}: Props) => {
-    const inputRef = useRef<HTMLInputElement>(null)
+    const [taskTitle, setTaskTitle] = useState('')
+
+    const createTaskHandler = () => {
+        createTask(taskTitle)
+        setTaskTitle('')
+    }
+
     return (
         <div>
             <h3>{title}</h3>
             <div>
-                <input ref={inputRef}/>
-                <Button title={'+'} onClick={() => {
-                    if (inputRef.current) {
-                        createTask(inputRef.current.value)
-                        inputRef.current.value = ''
-                    }
-                }}/>
+                <input value={taskTitle}
+                       onChange={event => setTaskTitle(event.currentTarget.value)}
+                           onKeyDown={event => console.log(event.key)}/>
+
+                <Button title={'+'} onClick={createTaskHandler}/>
             </div>
             {tasks.length === 0 ? (
                 <p>Тасок нет</p>
