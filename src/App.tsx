@@ -20,33 +20,34 @@ export const App = () => {
     ])
 
     const deleteTask = (taskId: string) => {
-        const filteredTasks = tasks.filter(task => {
-            return task.id !== taskId
-        })
-        setTasks(filteredTasks)
+        setTasks(tasks.filter(task => task.id !== taskId))
     }
 
     const createTask = (title: string) => {
-        const newTask = {id: v1(), title, isDone: false}
-        const newTasks = [newTask, ...tasks]
-        setTasks(newTasks)
+        setTasks([{id: v1(), title, isDone: false}, ...tasks])
     }
 
-    let filteredTasks = tasks
-    if (filter === 'Active') {
-        filteredTasks = tasks.filter(task => !task.isDone)
+    const changeTaskStatus = (taskId: string, isDone: boolean) => {
+        setTasks(tasks.map(task =>
+            task.id === taskId ? {...task, isDone} : task
+        ))
     }
-    if (filter === 'Completed') {
-        filteredTasks = tasks.filter(task => task.isDone)
-    }
+
+    const filteredTasks = filter === 'Active'
+        ? tasks.filter(task => !task.isDone)
+        : filter === 'Completed'
+            ? tasks.filter(task => task.isDone)
+            : tasks
 
     return (
         <div className="app">
-            <TodolistItem title="What to learn"
-                          tasks={filteredTasks}
-                          deleteTask={deleteTask}
-                          changeFilter={changeFilter}
-                          createTask={createTask}
+            <TodolistItem
+                title="What to learn"
+                tasks={filteredTasks}
+                deleteTask={deleteTask}
+                changeFilter={changeFilter}
+                createTask={createTask}
+                changeTaskStatus={changeTaskStatus}
             />
         </div>
     )
