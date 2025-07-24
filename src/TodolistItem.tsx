@@ -7,15 +7,16 @@ type Props = {
   deleteTask: (taskId: string) => void,
     onClick?: () => void
     changeFilter: (filter: FilterValues) => void,
+    createTask: () => void
 }
 
-export const TodolistItem = ({title, tasks, deleteTask, changeFilter }: Props) => {
+export const TodolistItem = ({title, tasks, deleteTask, changeFilter, createTask }: Props) => {
   return (
       <div>
         <h3>{title}</h3>
         <div>
           <input/>
-            <Button title={'+'} onClick={() => {}} />
+            <Button title={'+'} onClick={createTask} />
         </div>
         {tasks.length === 0 ? (
             <p>Тасок нет</p>
