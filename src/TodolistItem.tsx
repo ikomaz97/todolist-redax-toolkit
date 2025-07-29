@@ -2,6 +2,7 @@ import type {FilterValues, Task} from './App'
 import {Button} from './Button'
 import {ChangeEvent, type KeyboardEvent, useState} from 'react'
 
+
 type Props = {
     title: string,
     tasks: Task[],
@@ -11,6 +12,7 @@ type Props = {
     createTask: (title: string) => void
     changeTaskStatus: (taskId: string, isDone: boolean) => void
     filter: FilterValues,
+    id: string
 }
 
 export const TodolistItem = ({title, tasks, deleteTask,
@@ -44,6 +46,9 @@ export const TodolistItem = ({title, tasks, deleteTask,
         changeTaskStatus(taskId, e.currentTarget.checked)
     }
 
+
+
+
     return (
         <div>
             <h3>{title}</h3>
@@ -52,6 +57,7 @@ export const TodolistItem = ({title, tasks, deleteTask,
                        value={taskTitle}
                        onChange={changeTaskTitleHandler}
                        onKeyDown={createTaskOnEnterHandler}/>
+
                 <Button title={'+'} onClick={createTaskHandler}/>
                 {error && <div className={'error-message'}>{error}</div>}
             </div>
