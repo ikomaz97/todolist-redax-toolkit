@@ -47,7 +47,9 @@ export const App = () => {
                 changeFilter={changeFilter}
                 createTask={createTask}
                 changeTaskStatus={changeTaskStatus}
-                filter={filter} id={''}            />
+                filter={filter}
+                id="todolist-1"
+            />
         </div>
     )
 }
