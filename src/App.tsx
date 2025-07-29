@@ -28,9 +28,8 @@ export const App = () => {
     }
 
     const changeTaskStatus = (taskId: string, isDone: boolean) => {
-        setTasks(tasks.map(task =>
-            task.id === taskId ? {...task, isDone} : task
-        ))
+        const newState = tasks.map(task => task.id == taskId ? { ...task, isDone } : task)
+        setTasks(newState)
     }
 
     const filteredTasks = filter === 'Active'
@@ -48,6 +47,7 @@ export const App = () => {
                 changeFilter={changeFilter}
                 createTask={createTask}
                 changeTaskStatus={changeTaskStatus}
+                filter={filter}
             />
         </div>
     )
