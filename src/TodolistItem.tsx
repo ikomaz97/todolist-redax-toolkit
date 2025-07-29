@@ -2,6 +2,7 @@
 import type { FilterValues, Task } from './App';
 import { Button } from './Button';
 import { CreateItemForm } from './CreateItemForm';
+import {EditableSpan} from "./EditableSpan.tsx";
 
 type Props = {
     title: string;
@@ -51,7 +52,7 @@ export const TodolistItem = ({
                                     checked={task.isDone}
                                     onChange={changeTaskStatusHandler(task.id)}
                                 />
-                                <span>{task.title}</span>
+                                <EditableSpan value={task.title} />
                                 <Button title="x" onClick={deleteTaskHandler} />
                             </li>
                         );
