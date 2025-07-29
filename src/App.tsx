@@ -76,7 +76,7 @@ export const App = () => {
 
     return (
         <div className="app">
-            <h1>My Todo App</h1>
+
             <button onClick={() => createTodolist('New Todolist')}>+ Add Todolist</button>
 
             <div style={{ display: 'flex', gap: '20px' }}>
