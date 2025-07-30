@@ -13,6 +13,7 @@ type Props = {
     changeTaskStatus: (taskId: string, isDone: boolean) => void;
     filter: FilterValues;
     id: string;
+    changeTaskTitle: (todolistId: string, taskId: string, title: string) => void
 };
 
 export const TodolistItem = ({

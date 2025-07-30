@@ -17,6 +17,9 @@ type Todolist = {
     filter: FilterValues;
 };
 
+
+
+
 export const App = () => {
     // ✅ Стейт для тудулистов
     const [todolists, setTodolists] = useState<Todolist[]>([
@@ -74,6 +77,11 @@ export const App = () => {
         );
     };
 
+
+    const changeTaskTitle = (todolistId: string, taskId: string, title: string) => {
+        setTasks({...tasks, [todolistId]: tasks[todolistId].map(task => task.id === taskId ? { ...task, title } : task)})
+    }
+
     return (
         <div className="app">
 
@@ -100,6 +108,7 @@ export const App = () => {
                             }
                             filter={tl.filter}
                             id={tl.id}
+                            changeTaskTitle={changeTaskTitle}
                         />
                     );
                 })}
