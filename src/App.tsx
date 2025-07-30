@@ -77,7 +77,7 @@ export const App = () => {
     return (
         <div className="app">
 
-            <button onClick={() => createTodolist('New Todolist')}>+ Add Todolist</button>
+            <button onClick={() => createTodolist('New Todolist')}>+</button>
 
             <div style={{ display: 'flex', gap: '20px' }}>
                 {todolists.map(tl => {
@@ -96,8 +96,7 @@ export const App = () => {
                             deleteTask={taskId => deleteTask(tl.id, taskId)}
                             changeFilter={filter => changeFilter(tl.id, filter)}
                             createTask={title => createTask(tl.id, title)}
-                            changeTaskStatus={(taskId, isDone) =>
-                                changeTaskStatus(tl.id, taskId, isDone)
+                            changeTaskStatus={(taskId, isDone) => changeTaskStatus(tl.id, taskId, isDone)
                             }
                             filter={tl.filter}
                             id={tl.id}
