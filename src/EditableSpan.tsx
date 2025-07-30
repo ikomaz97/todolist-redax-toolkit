@@ -1,8 +1,9 @@
 import {ChangeEvent, useState} from "react";
 
 type Props = {
-    value: string
-}
+    value: string;
+    onChange: (newValue: string) => void;
+};
 
 export const EditableSpan = ({ value }: Props) => {
     const [isEditMode, setIsEditMode] = useState(false)
