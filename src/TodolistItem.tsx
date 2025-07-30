@@ -14,6 +14,7 @@ type Props = {
     filter: FilterValues;
     id: string;
     changeTaskTitle: (todolistId: string, taskId: string, title: string) => void
+    changeTodolistTitle: (todolistId: string, title: string) => void
 };
 
 export const TodolistItem = ({
@@ -26,6 +27,8 @@ export const TodolistItem = ({
                                  filter,
                                  id,
                                  changeTaskTitle,
+                                 changeTodolistTitle,
+
                              }: Props) => {
     const createTaskHandler = (title: string) => {
         createTask(id, title);
@@ -35,9 +38,15 @@ export const TodolistItem = ({
         changeTaskStatus(taskId, e.currentTarget.checked);
     };
 
+    const changeTodolistTitleHandler = (title: string) => {
+        changeTodolistTitle(id, title)
+    }
+
     return (
         <div>
-            <h3>{title}</h3>
+            <h3>
+                <EditableSpan value={title} onChange={changeTodolistTitleHandler} />
+            </h3>
             <CreateItemForm onCreateItem={createTaskHandler} />
 
             {tasks.length === 0 ? (
