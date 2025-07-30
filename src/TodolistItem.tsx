@@ -25,6 +25,7 @@ export const TodolistItem = ({
                                  changeTaskStatus,
                                  filter,
                                  id,
+                                 changeTaskTitle,
                              }: Props) => {
     const createTaskHandler = (title: string) => {
         createTask(id, title);
@@ -46,15 +47,15 @@ export const TodolistItem = ({
                     {tasks.map((task) => {
                         const deleteTaskHandler = () => deleteTask(task.id);
 
+                        const changeTaskTitleHandler = (title: string) => {
+                            changeTaskTitle(id, task.id, title)
+                        }
+
                         return (
                             <li key={task.id} className={task.isDone ? 'is-done' : ''}>
-                                <input
-                                    type="checkbox"
-                                    checked={task.isDone}
-                                    onChange={changeTaskStatusHandler(task.id)}
-                                />
-                                <EditableSpan value={task.title} />
-                                <Button title="x" onClick={deleteTaskHandler} />
+                                <input type="checkbox" checked={task.isDone} onChange={changeTaskStatusHandler(task.id)}/>
+                                <EditableSpan value={task.title} onChange={changeTaskTitleHandler} />
+                                <Button title={'x'} onClick={deleteTaskHandler}/>
                             </li>
                         );
                     })}
