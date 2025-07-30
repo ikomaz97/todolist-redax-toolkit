@@ -5,7 +5,7 @@ type Props = {
     onChange: (newValue: string) => void;
 };
 
-export const EditableSpan = ({ value }: Props) => {
+export const EditableSpan = ({ value, onChange  }: Props) => {
     const [isEditMode, setIsEditMode] = useState(false)
     const [title, setTitle] = useState(value)
 
@@ -19,6 +19,7 @@ export const EditableSpan = ({ value }: Props) => {
 
     const turnOffEditMode = () => {
         setIsEditMode(false)
+        onChange(title)
     }
 
     return (
