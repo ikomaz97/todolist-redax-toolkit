@@ -10,8 +10,6 @@ export type Todolist = {
   filter: FilterValues
 }
 
-
-
 export type Task = {
   id: string
   title: string
