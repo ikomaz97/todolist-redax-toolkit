@@ -5,7 +5,6 @@ type Props = {
   onCreateItem: (title: string) => void
 }
 
-
 export const CreateItemForm = ({ onCreateItem }: Props) => {
   const [title, setTitle] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -19,7 +18,6 @@ export const CreateItemForm = ({ onCreateItem }: Props) => {
       setError('Title is required')
     }
   }
-
 
   const changeTitleHandler = (event: ChangeEvent<HTMLInputElement>) => {
     setTitle(event.currentTarget.value)
