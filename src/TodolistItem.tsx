@@ -4,7 +4,6 @@ import {Button} from './Button'
 import {CreateItemForm} from './CreateItemForm'
 import {EditableSpan} from './EditableSpan'
 
-
 type Props = {
   todolist: Todolist
   tasks: Task[]
@@ -16,7 +15,6 @@ type Props = {
   changeTaskTitle: (todolistId: string, taskId: string, title: string) => void
   changeTodolistTitle: (todolistId: string, title: string) => void
 }
-
 
 export const TodolistItem = (props: Props) => {
   const {
