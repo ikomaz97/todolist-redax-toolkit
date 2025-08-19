@@ -37,11 +37,13 @@ export const CreateItemForm = ({ onCreateItem }: Props) => {
                    className={error ? 'error' : ''}
                    value={title}
                    size={'small'}
+                   error={!!error}
+                   helperText={error}
                    onChange={changeTitleHandler}
                    onKeyDown={createItemOnEnterHandler}/>
         <Button variant="contained" onClick={createItemHandler}>+</Button>
 
-        {error && <div className={'error-message'}>{error}</div>}
+
       </div>
   )
 }
