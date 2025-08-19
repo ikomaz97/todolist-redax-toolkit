@@ -1,6 +1,5 @@
 import {type ChangeEvent, type KeyboardEvent, useState} from 'react'
-import {Button} from './Button'
-
+import Button from '@mui/material/Button'
 type Props = {
   onCreateItem: (title: string) => void
 }
@@ -36,7 +35,8 @@ export const CreateItemForm = ({ onCreateItem }: Props) => {
                value={title}
                onChange={changeTitleHandler}
                onKeyDown={createItemOnEnterHandler}/>
-        <Button title={'+'} onClick={createItemHandler} />
+        <Button variant="contained" onClick={createItemHandler}>+</Button>
+
         {error && <div className={'error-message'}>{error}</div>}
       </div>
   )
