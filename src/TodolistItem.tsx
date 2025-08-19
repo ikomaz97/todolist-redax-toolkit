@@ -83,7 +83,9 @@ export const TodolistItem = (props: Props) => {
                       <input type="checkbox" checked={task.isDone}
                              onChange={changeTaskStatusHandler}/>
                       <EditableSpan value={task.title} onChange={changeTaskTitleHandler} />
-                      <Button title={'x'} onClick={deleteTaskHandler}/>
+                      <IconButton onClick={deleteTaskHandler}>
+                        <DeleteIcon />
+                      </IconButton>
                     </li>
                 )
               })}
