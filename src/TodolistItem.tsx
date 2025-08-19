@@ -3,6 +3,9 @@ import type {FilterValues, Task, Todolist} from './App'
 import {Button} from './Button'
 import {CreateItemForm} from './CreateItemForm'
 import {EditableSpan} from './EditableSpan'
+import IconButton from '@mui/material/IconButton'
+import DeleteIcon from '@mui/icons-material/Delete'
+
 
 type Props = {
   todolist: Todolist
@@ -53,6 +56,9 @@ export const TodolistItem = (props: Props) => {
           </h3>
           <Button title={'x'} onClick={deleteTodolistHandler}/>
         </div>
+        <IconButton onClick={deleteTodolistHandler}>
+          <DeleteIcon />
+        </IconButton>
         <CreateItemForm onCreateItem={createTaskHandler}/>
         {tasks.length === 0 ? (
             <p>Тасок нет</p>
