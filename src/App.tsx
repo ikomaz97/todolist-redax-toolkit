@@ -3,7 +3,11 @@ import {useState} from 'react'
 import {v1} from 'uuid'
 import {CreateItemForm} from './CreateItemForm'
 import {TodolistItem} from './TodolistItem'
-
+import AppBar from '@mui/material/AppBar'
+import Toolbar from '@mui/material/Toolbar'
+import Button from '@mui/material/Button'
+import IconButton from '@mui/material/IconButton'
+import MenuIcon from '@mui/icons-material/Menu'
 
 
 export type Todolist = {
@@ -85,6 +89,14 @@ export const App = () => {
 
   return (
       <div className="app">
+        <AppBar position="static">
+          <Toolbar>
+            <IconButton color="inherit">
+              <MenuIcon />
+            </IconButton>
+            <Button color="inherit">Sign in</Button>
+          </Toolbar>
+        </AppBar>
         <CreateItemForm onCreateItem={createTodolist}/>
         {todolists.map(todolist => {
           const todolistTasks = tasks[todolist.id]
