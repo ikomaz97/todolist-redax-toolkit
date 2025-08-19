@@ -1,27 +1,12 @@
 .app {
-  padding: 30px;
   display: flex;
-}
-
-.app > div {
-  margin-right: 50px;
+  flex-direction: column;
+  width: 100vw;
 }
 
 .container {
   display: flex;
   align-items: center;
-}
-
-.error {
-  border: red 1px solid;
-}
-
-.error-message {
-  color: red;
-}
-
-.active-filter {
-  background-color: lightgreen;
 }
 
 .is-done {
