@@ -8,7 +8,8 @@ import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
-
+import Box from '@mui/material/Box'
+import {containerSx, getListItemSx} from "./TodolistItem.styles.ts";
 
 type Props = {
   todolist: Todolist
@@ -82,9 +83,11 @@ export const TodolistItem = (props: Props) => {
                 }
 
                 return (
-                    <ListItem key={task.id} className={task.isDone ? 'is-done' : ''}>
-                      <Checkbox checked={task.isDone} onChange={changeTaskStatusHandler}/>
-                      <EditableSpan value={task.title} onChange={changeTaskTitleHandler} />
+                    <ListItem key={task.id} sx={getListItemSx(task.isDone)}>
+                      <div>
+                        <Checkbox checked={task.isDone} onChange={changeTaskStatusHandler} />
+                        <EditableSpan value={task.title} onChange={changeTaskTitleHandler} />
+                      </div>
                       <IconButton onClick={deleteTaskHandler}>
                         <DeleteIcon />
                       </IconButton>
@@ -93,6 +96,7 @@ export const TodolistItem = (props: Props) => {
               })}
             </List>
         )}
+        <Box sx={containerSx}>{/*...*/}</Box>
         <div>
           <Button variant={filter === 'all' ? 'outlined' : 'text'}
                   color={'inherit'}
