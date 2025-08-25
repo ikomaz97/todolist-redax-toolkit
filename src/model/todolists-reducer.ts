@@ -1,11 +1,18 @@
 import {Todolist} from "../App.tsx";
 
+
 export type DeleteTodolistAction = {
     type: 'delete_todolist'
     payload: {
         id: string
     }
-} 
+}
+
+export const deleteTodolistAC = (id: string): DeleteTodolistAction => {
+    return {
+        type: 'delete_todolist',
+        payload: { id }} as const
+}
 
 type Actions = DeleteTodolistAction
 
