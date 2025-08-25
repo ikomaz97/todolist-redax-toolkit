@@ -40,20 +40,20 @@ export const App = () => {
     const todolistId1 = v1()
     const todolistId2 = v1()
 
-  const [themeMode, setThemeMode] = useState<ThemeMode>('light')
+    const [themeMode, setThemeMode] = useState<ThemeMode>('light')
 
-  const theme = createTheme({
-    palette: {
-      mode: themeMode,
-      primary: {
-        main: '#087EA4',
-      },
-    },
-  })
+    const theme = createTheme({
+        palette: {
+            mode: themeMode,
+            primary: {
+                main: '#087EA4',
+            },
+        },
+    })
 
-  const changeMode = () => {
-    setThemeMode(themeMode === 'light' ? 'dark' : 'light')
-  }
+    const changeMode = () => {
+        setThemeMode(themeMode === 'light' ? 'dark' : 'light')
+    }
 
 
     const [todolists, setTodolists] = useState<Todolist[]>([
@@ -114,7 +114,7 @@ export const App = () => {
     return (
         <div>
             <ThemeProvider theme={theme}>
-              <CssBaseline />
+                <CssBaseline/>
                 <AppBar position="static" sx={{mb: '30px'}}>
                     <Toolbar>
                         <Container maxWidth={'lg'} sx={containerSx}>
@@ -125,7 +125,7 @@ export const App = () => {
                                 <NavButton>Sign in</NavButton>
                                 <NavButton>Sign up</NavButton>
                                 <NavButton background={theme.palette.primary.dark}>Faq</NavButton>
-                                <Switch color={'default'} onChange={changeMode} />
+                                <Switch color={'default'} onChange={changeMode}/>
                             </div>
                             <Button color="inherit">Sign in</Button>
                         </Container>
