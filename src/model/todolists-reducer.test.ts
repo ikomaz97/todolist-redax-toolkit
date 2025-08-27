@@ -34,3 +34,4 @@ test('correct todolist should be created', () => {
     expect(typeof endState[2].id).toBe('string') // ✅ Проверяем, что id - это строка
     expect(endState[2].id).not.toBe('') // ✅ Проверяем, что id не пустой
 })
+
