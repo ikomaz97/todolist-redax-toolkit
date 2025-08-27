@@ -14,13 +14,21 @@ export const changeTodolistTitleAC = (todolistId: string, title: string) => {
     return {type: 'New title', payload: { todolistId, title }} as const
 }
 
+export const changeTodolistFilterAC = (todolistId: string, title: string) => {
+    return {type: 'New title', payload: { todolistId, title }} as const
+}
+
 export type DeleteTodolistAction = ReturnType<typeof deleteTodolistAC>
 
 export type CreateTodolistAC = ReturnType<typeof createTodolistAC>
 
 export type ChangeTodolistTitleAC = ReturnType<typeof changeTodolistTitleAC>
 
-type Actions = DeleteTodolistAction | CreateTodolistAC |ChangeTodolistTitleAC
+export type ChangeTodolistFilterAC = ReturnType<typeof changeTodolistFilterAC>
+
+
+
+type Actions = DeleteTodolistAction | CreateTodolistAC |ChangeTodolistTitleAC |ChangeTodolistFilterAC
 
 const initialState: Todolist[] = []
 
