@@ -1,6 +1,12 @@
 import {v1} from 'uuid'
 import type {Todolist} from '../App'
-import {changeTodolistTitleAC, createTodolistAC, deleteTodolistAC, todolistsReducer} from './todolists-reducer'
+import {
+    changeTodolistFilterAC,
+    changeTodolistTitleAC,
+    createTodolistAC,
+    deleteTodolistAC,
+    todolistsReducer
+} from './todolists-reducer'
 import { beforeEach, expect, test } from 'vitest'
 
 let todolistId1: string
@@ -45,3 +51,12 @@ test('correct todolist should change its title', () => {
     expect(endState[1].title).toBe(title)
 })
 
+
+test('correct todolist should change its filter', () => {
+    const filter = 'completed'
+    // Передаем два аргумента вместо одного объекта
+    const endState = todolistsReducer(startState, changeTodolistFilterAC(todolistId2, filter))
+
+    expect(endState[0].filter).toBe('all') // Первый todolist не должен измениться
+    expect(endState[1].filter).toBe(filter) // Второй todolist должен иметь новый фильтр
+})
