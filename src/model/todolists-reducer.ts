@@ -1,4 +1,4 @@
-import {Todolist} from "../App.tsx";
+import {FilterValues, Todolist} from "../App.tsx";
 
 
 
@@ -14,8 +14,8 @@ export const changeTodolistTitleAC = (todolistId: string, title: string) => {
     return {type: 'New title', payload: { todolistId, title }} as const
 }
 
-export const changeTodolistFilterAC = (todolistId: string, title: string) => {
-    return {type: 'New title', payload: { todolistId, title }} as const
+export const changeTodolistFilterAC = (todolistId: string, filter: FilterValues) => {
+    return {type: 'completed', payload: { todolistId, filter }} as const
 }
 
 export type DeleteTodolistAction = ReturnType<typeof deleteTodolistAC>
@@ -28,7 +28,7 @@ export type ChangeTodolistFilterAC = ReturnType<typeof changeTodolistFilterAC>
 
 
 
-type Actions = DeleteTodolistAction | CreateTodolistAC |ChangeTodolistTitleAC |ChangeTodolistFilterAC
+type Actions = DeleteTodolistAction | CreateTodolistAC | ChangeTodolistTitleAC |ChangeTodolistFilterAC
 
 const initialState: Todolist[] = []
 
@@ -47,6 +47,11 @@ export const todolistsReducer = (state: Todolist[] = initialState, action: Actio
         case 'New title': {
               return state.map(todolist => todolist.id === action.payload.todolistId ? {...todolist, title: action.payload.title} : todolist)
         }
+           // (todolists.map(todolist => todolist.id === todolistId ? {...todolist, filter} : todolist))
+        case 'completed'        : {
+            return state.map(todolist => todolist.id === action.payload.todolistId ? {...todolist, filter: action.payload.filter} : todolist)
+        }
+
 
         default:
             return state;
