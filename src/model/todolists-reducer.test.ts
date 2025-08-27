@@ -35,3 +35,12 @@ test('correct todolist should be created', () => {
     expect(endState[2].id).not.toBe('') // ✅ Проверяем, что id не пустой
 })
 
+
+test('correct todolist should change its title', () => {
+    const title = 'New title'
+    const endState = todolistsReducer(startState, changeTodolistTitleAC({id: todolistId2, title}))
+
+    expect(endState[0].title).toBe('What to learn')
+    expect(endState[1].title).toBe(title)
+})
+
