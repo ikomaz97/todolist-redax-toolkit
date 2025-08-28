@@ -16,6 +16,7 @@ import {NavButton} from "../NavButton.ts";
 import {createTheme, ThemeProvider} from '@mui/material/styles'
 import Switch from '@mui/material/Switch'
 import CssBaseline from '@mui/material/CssBaseline'
+import {changeTodolistTitleAC, createTodolistAC} from "./model/todolists-reducer.ts";
 
 type ThemeMode = 'dark' | 'light'
 
@@ -66,20 +67,19 @@ export const App = () => {
     }
 
     const createTodolist = (title: string) => {
-        const todolistId = v1()
-        const newTodolist: Todolist = {id: todolistId, title, filter: 'all'}
-        setTodolists([newTodolist, ...todolists])
-        setTasks({...tasks, [todolistId]: []})
+        const action = createTodolistAC(title)
+        dispatchToTodolists(action)
+        setTasks({...tasks, [action.payload.id]: []})
     }
 
-    const deleteTodolist = (todolistId: string) => {
-        setTodolists(todolists.filter(todolist => todolist.id !== todolistId))
-        delete tasks[todolistId]
+    const deleteTodolist = (id: string) => {
+        const action = createTodolistAC(id: string)
+        dispatchToTodolists(action)
         setTasks({...tasks})
     }
 
     const changeTodolistTitle = (todolistId: string, title: string) => {
-        setTodolists(todolists.map(todolist => todolist.id === todolistId ? {...todolist, title} : todolist))
+        dispatchToTodolists(changeTodolistTitleAC({id: todolistId, title}))
     }
 
 
