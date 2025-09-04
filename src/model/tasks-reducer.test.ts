@@ -42,15 +42,18 @@ test('correct task should be deleted', () => {
 })
 
 
-test('array should be created for new todolist', () => {
-    const endState = tasksReducer(startState, createTodolistAC('New todolist'))
+test('correct task should be created at correct array', () => {
+    const endState = tasksReducer(
+        startState,
+        createTaskAC({
+            todolistId: 'todolistId2',
+            title: 'juice',
+        })
+    )
 
-    const keys = Object.keys(endState)
-    const newKey = keys.find(k => k !== 'todolistId1' && k !== 'todolistId2')
-    if (!newKey) {
-        throw Error('New key should be added')
-    }
-
-    expect(keys.length).toBe(3)
-    expect(endState[newKey]).toEqual([])
+    expect(endState.todolistId1.length).toBe(XXX)
+    expect(endState.todolistId2.length).toBe(XXX)
+    expect(endState.todolistId2[0].id).toBeDefined()
+    expect(endState.todolistId2[0].title).toBe(XXX)
+    expect(endState.todolistId2[0].isDone).toBe(XXX)
 })
