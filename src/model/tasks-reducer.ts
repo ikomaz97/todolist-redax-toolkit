@@ -6,13 +6,15 @@ const initialState: TasksState = {}
 export const deleteTaskAC = (payload: { todolistId: string; taskId: string }) => {
     return  {type: 'delete_task', payload} as const}
 
-
+export const createTaskAC =()
 
 
 
 export type DeleteTaskAction = ReturnType<typeof deleteTaskAC>
+export type CreateTaskAction = ReturnType<typeof createTaskAC>
 
-type Actions = DeleteTaskAction
+type Actions =  | DeleteTaskAction
+                | CreateTaskAction
 
 
 export const tasksReducer = (task: TasksState = initialState, action: Actions): TasksState => {
