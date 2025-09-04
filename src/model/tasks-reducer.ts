@@ -4,8 +4,6 @@ const initialState: TasksState = {}
 
 
 
-
-
 export const tasksReducer = (state: TasksState = initialState, action: Actions): TasksState => {
     switch (action.type) {
         case '': {
