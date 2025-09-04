@@ -21,6 +21,27 @@ beforeEach(() => {
 })
 
 
+
+test('correct task should be deleted', () => {
+    const endState = tasksReducer(
+        startState,
+        deleteTaskAC({ todolistId: 'todolistId2', taskId: '2' })
+    )
+
+    expect(endState).toEqual({
+        todolistId1: [
+            { id: '1', title: 'CSS', isDone: false },
+            { id: '2', title: 'JS', isDone: true },
+            { id: '3', title: 'React', isDone: false },
+        ],
+        todolistId2: [
+            { id: '1', title: 'bread', isDone: false },
+            { id: '3', title: 'tea', isDone: false },
+        ],
+    })
+})
+
+
 test('array should be created for new todolist', () => {
     const endState = tasksReducer(startState, createTodolistAC('New todolist'))
 
