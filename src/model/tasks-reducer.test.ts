@@ -50,9 +50,9 @@ test('correct task should be created at correct array', () => {
         })
     )
 
-    expect(endState.todolistId1.length).toBe(XXX)
-    expect(endState.todolistId2.length).toBe(XXX)
-    expect(endState.todolistId2[0].id).toBeDefined()
-    expect(endState.todolistId2[0].title).toBe(XXX)
-    expect(endState.todolistId2[0].isDone).toBe(XXX)
+    expect(endState.todolistId1.length).toBe(3)         // список 1 не изменился
+    expect(endState.todolistId2.length).toBe(4)         // в списке 2 стало на 1 задачу больше
+    expect(endState.todolistId2[0].id).toBeDefined()    // id сгенерирован
+    expect(endState.todolistId2[0].title).toBe('juice') // название совпадает
+    expect(endState.todolistId2[0].isDone).toBe(false)  // новая задача не выполнена
 })
