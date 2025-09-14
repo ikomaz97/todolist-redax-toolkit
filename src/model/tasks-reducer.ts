@@ -1,72 +1,86 @@
+import { createAction, createReducer, nanoid } from '@reduxjs/toolkit';
+import type { TasksState } from '../app/App.tsx';
 
-import type {Task, TasksState} from '../app/App.tsx'
-import type {CreateTodolistAction, DeleteTodolistAction} from './todolists-reducer'
-import {nanoid} from "@reduxjs/toolkit";
+const initialState: TasksState = {};
 
-const initialState: TasksState = {}
+// Action creators
+export const deleteTaskAC = createAction<{todolistId: string;taskId: string;}>('tasks/deleteTask');
+export const createTaskAC = createAction<{todolistId: string;title: string;}>('tasks/createTask');
+export const changeTaskStatusAC = createAction<{todolistId: string;taskId: string;isDone: boolean;}>('tasks/changeTaskStatus');
+export const changeTaskTitleAC = createAction<{todolistId: string;taskId: string;title: string;}>('tasks/changeTaskTitle');
+export const createTodolistAC = createAction<{id: string;}>('tasks/createTodolist');
+export const deleteTodolistAC = createAction<{id: string;}>('tasks/deleteTodolist');
 
-export const tasksReducer = (state: TasksState = initialState, action: Actions): TasksState => {
-  switch (action.type) {
-    case 'delete_task': {
-      return {
-        ...state,
-        [action.payload.todolistId]: state[action.payload.todolistId].filter(task => task.id !== action.payload.taskId)
-      }
-    }
-    case 'create_task': {
-      const newTask: Task = {title: action.payload.title, isDone: false, id: nanoid()}
-      return {...state, [action.payload.todolistId]: [newTask, ...state[action.payload.todolistId]]}
-    }
-    case "change_task_status": {
-      return {
-        ...state,
-        [action.payload.todolistId]: state[action.payload.todolistId].map(task => task.id === action.payload.taskId ? {...task, isDone: action.payload.isDone} : task)
-      }
-    }
-    case "change_task_title": {
-      return {
-        ...state,
-        [action.payload.todolistId]: state[action.payload.todolistId].map(task => task.id === action.payload.taskId ? {...task, title: action.payload.title} : task)
-      }
-    }
-    case "create_todolist": {
-      return {...state, [action.payload.id]: []}
-    }
-    case "delete_todolist": {
-      const newState = {...state}
-      delete newState[action.payload.id]
-      return newState
-    }
-    default:
-      return state
-  }
-}
+// Reducer
+export const tasksReducer = createReducer(initialState, builder => {
+    builder
+        // Удаление таски с помощью метода массива splice
+        .addCase(deleteTaskAC, (state, action) => {
+            const tasks = state[action.payload.todolistId];
+            const taskId = action.payload.taskId;
 
-export const deleteTaskAC = (payload: { todolistId: string, taskId: string }) => {
-  return {type: 'delete_task', payload} as const
-}
+            if (tasks) {
+                // Находим индекс таски для удаления
+                const index = tasks.findIndex(t => t.id === taskId);
+                if (index !== -1) {
+                    // Удаляем таску мутабельно с помощью splice
+                    tasks.splice(index, 1);
+                }
+            }
+        })
+        // Создание таски с помощью метода массива unshift
+        .addCase(createTaskAC, (state, action) => {
+            const { todolistId, title } = action.payload;
 
-export const createTaskAC = (payload: { todolistId: string, title: string }) => {
-  return {type: 'create_task', payload} as const
-}
+            // Если тудулист не существует, создаем пустой массив для него
+            if (!state[todolistId]) {
+                state[todolistId] = [];
+            }
 
-export const changeTaskStatusAC = (payload: { todolistId: string, taskId: string, isDone: boolean }) => {
-  return {type: 'change_task_status', payload} as const
-}
+            // Добавляем новую таску в начало массива с помощью unshift
+            state[todolistId].unshift({
+                id: nanoid(),
+                title: title.trim(),
+                isDone: false,
 
-export const changeTaskTitleAC = (payload: { todolistId: string, taskId: string, title: string }) => {
-  return {type: 'change_task_title', payload} as const
-}
+            });
+        })
+        // Изменение статуса таски с помощью метода массива find
+        .addCase(changeTaskStatusAC, (state, action) => {
+            const { todolistId, taskId, isDone } = action.payload;
+            const tasks = state[todolistId];
 
-export type DeleteTaskAction = ReturnType<typeof deleteTaskAC>
-export type CreateTaskAction = ReturnType<typeof createTaskAC>
-export type ChangeTaskStatusAction = ReturnType<typeof changeTaskStatusAC>
-export type ChangeTaskTitleAction = ReturnType<typeof changeTaskTitleAC>
+            if (tasks) {
+                // Находим таску с помощью find
+                const task = tasks.find(t => t.id === taskId);
+                if (task) {
+                    // Мутабельно изменяем статус таски
+                    task.isDone = isDone;
+                }
+            }
+        })
+        // Изменение названия таски с помощью метода массива find
+        .addCase(changeTaskTitleAC, (state, action) => {
+            const { todolistId, taskId, title } = action.payload;
+            const tasks = state[todolistId];
 
-type Actions =
-    | DeleteTaskAction
-    | CreateTaskAction
-    | ChangeTaskStatusAction
-    | ChangeTaskTitleAction
-    | CreateTodolistAction
-    | DeleteTodolistAction
+            if (tasks) {
+                // Находим таску с помощью find
+                const task = tasks.find(t => t.id === taskId);
+                if (task) {
+                    // Мутабельно изменяем название таски
+                    task.title = title.trim();
+                }
+            }
+        })
+        .addCase(createTodolistAC, (state, action) => {
+            const { id } = action.payload;
+            // Создаем пустой массив для нового тудулиста
+            state[id] = [];
+        })
+        .addCase(deleteTodolistAC, (state, action) => {
+            const { id } = action.payload;
+            // Удаляем тудулист из состояния
+            delete state[id];
+        });
+});
