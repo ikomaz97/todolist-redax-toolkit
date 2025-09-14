@@ -1,9 +1,8 @@
 import { beforeEach, expect, test } from 'vitest'
-import type {TasksState} from '../app/App.tsx'
+import type {TasksState} from '../app/App'
 import {
   changeTaskStatusAC, changeTaskTitleAC,
   createTaskAC,
-
   deleteTaskAC,
   tasksReducer
 } from './tasks-reducer'
