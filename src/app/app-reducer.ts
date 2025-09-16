@@ -1,6 +1,15 @@
-const initialState = {
+import {createReducer} from "@reduxjs/toolkit";
+
+
+export const initialState = {
     themeMode: 'light' as ThemeMode,
 }
+
+
+
+
+export const changeThemeModeAC = changeTaskStatusAC<{themeMode: ThemeMode}>('app/changeThemeMode')
+
 
 export const appReducer = createReducer(initialState, builder => {
     builder
