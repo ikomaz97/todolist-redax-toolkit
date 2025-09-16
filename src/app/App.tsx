@@ -1,11 +1,16 @@
 import './App.css'
-import {createTheme, ThemeProvider} from '@mui/material/styles'
+import {ThemeProvider} from '@mui/material/styles'
 import {useAppDispatch} from '../common/hooks/useAppDispatch'
 import {useAppSelector} from '../common/hooks/useAppSelector'
 import {CreateItemForm} from '../CreateItemForm'
 import {changeTaskStatusAC, changeTaskTitleAC, createTaskAC, deleteTaskAC} from '../model/tasks-reducer'
 import {selectTasks} from '../model/tasks-selectors'
-import {changeTodolistFilterAC, changeTodolistTitleAC, createTodolistAC, deleteTodolistAC} from '../model/todolists-reducer'
+import {
+  changeTodolistFilterAC,
+  changeTodolistTitleAC,
+  createTodolistAC,
+  deleteTodolistAC
+} from '../model/todolists-reducer'
 import {selectTodolists} from '../model/todolists-selectors'
 import {TodolistItem} from '../TodolistItem'
 import AppBar from '@mui/material/AppBar'
@@ -21,6 +26,7 @@ import {containerSx} from '../TodolistItem.styles'
 import {NavButton} from '../NavButton'
 import {selectThemeMode} from "./app-selectors.ts";
 import {changeThemeModeAC} from "./app-reducer.ts";
+import {getTheme} from "../common/theme/theme.ts";
 
 // Добавьте определение типа FilterValues
 export type FilterValues = 'all' | 'active' | 'completed'
@@ -46,14 +52,9 @@ export const App = () => {
 
   const dispatch = useAppDispatch()
 
-  const theme = createTheme({
-    palette: {
-      mode: themeMode,
-      primary: {
-        main: '#087EA4',
-      },
-    },
-  })
+
+
+  const theme = getTheme(themeMode)
 
   const changeMode = () => {
     dispatch(changeThemeModeAC({themeMode: themeMode === 'light' ? 'dark' : 'light'}))
