@@ -10,6 +10,8 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import {containerSx, getListItemSx} from './TodolistItem.styles'
+import {useAppSelector} from "@/common/hooks/useAppSelector.ts";
+import {selectTasks} from "@/model/tasks-selectors.ts";
 
 type Props = {
   todolist: Todolist
@@ -26,7 +28,6 @@ type Props = {
 export const TodolistItem = (props: Props) => {
   const {
     todolist: {id, title, filter},
-    tasks,
     deleteTask,
     changeFilter,
     createTask,
@@ -35,6 +36,8 @@ export const TodolistItem = (props: Props) => {
     changeTaskTitle,
     changeTodolistTitle,
   } = props
+
+
 
   const changeFilterHandler = (filter: FilterValues) => {
     changeFilter(id, filter)
@@ -52,6 +55,18 @@ export const TodolistItem = (props: Props) => {
     createTask(id, title)
   }
 
+  const tasks = useAppSelector(selectTasks)
+
+  const todolistTasks = tasks[id]
+  let filteredTasks = todolistTasks
+  if (filter === 'active') {
+    filteredTasks = todolistTasks.filter(task => !task.isDone)
+  }
+  if (filter === 'completed') {
+    filteredTasks = todolistTasks.filter(task => task.isDone)
+  }
+
+
   return (
       <div>
         <div className={'container'}>
@@ -63,11 +78,11 @@ export const TodolistItem = (props: Props) => {
           </IconButton>
         </div>
         <CreateItemForm onCreateItem={createTaskHandler}/>
-        {tasks.length === 0 ? (
+        {filteredTasks.length === 0 ? (
             <p>Тасок нет</p>
         ) : (
             <List>
-              {tasks.map(task => {
+              {filteredTasks.map(task => {
                 const deleteTaskHandler = () => {
                   deleteTask(id, task.id)
                 }
