@@ -1,10 +1,11 @@
 import {type ChangeEvent, type CSSProperties, useEffect, useState} from 'react'
 import Checkbox from '@mui/material/Checkbox'
-import {CreateItemForm} from '@/common/components/CreateItemForm/CreateItemForm'
-import {EditableSpan} from '@/common/components/EditableSpan/EditableSpan'
+
 import axios from 'axios'
-import {BaseResponse} from "@/common/types.ts";
-import {T} from "vitest/dist/chunks/environment.LoooBwUu";
+import type {BaseResponse} from '@/common/types'
+import {CreateItemForm, EditableSpan} from "@/common/components";
+
+
 
 export const AppHttpRequests = () => {
   const [todolists, setTodolists] = useState<Todolist[]>([])
@@ -24,7 +25,7 @@ export const AppHttpRequests = () => {
   }, [])
 
   const createTodolist = (title: string) => {
-    axios.post<BaseResponse<{}>>(
+    axios.post<BaseResponse>(
             'https://social-network.samuraijs.com/api/1.1/todo-lists',
             { title },
             {
@@ -41,7 +42,7 @@ export const AppHttpRequests = () => {
   }
   const deleteTodolist = (id: string) => {
     axios
-        .delete<DeleteTodolistResponse>(`https://social-network.samuraijs.com/api/1.1/todo-lists/${id}`, {
+        .delete<BaseResponse>(`https://social-network.samuraijs.com/api/1.1/todo-lists/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
             'API-KEY': apiKey,
