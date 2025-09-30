@@ -3,20 +3,52 @@ import Checkbox from '@mui/material/Checkbox'
 import {CreateItemForm} from '@/common/components/CreateItemForm/CreateItemForm'
 import {EditableSpan} from '@/common/components/EditableSpan/EditableSpan'
 import axios from 'axios'
+import {BaseResponse} from "@/common/types.ts";
+import {T} from "vitest/dist/chunks/environment.LoooBwUu";
 
 export const AppHttpRequests = () => {
-  const [todolists, setTodolists] = useState<any>([])
+  const [todolists, setTodolists] = useState<Todolist[]>([])
   const [tasks, setTasks] = useState<any>({})
 
+
+  const token = 'cbb13dd0-42a7-409e-b222-cec62547608b'
+  const apiKey ='8f8b8a12-f302-419e-8f3b-a77e020bdfc5'
+
+
   useEffect(() => {
-    axios.get('https://social-network.samuraijs.com/api/1.1/todo-lists').then(res => {
-      console.log(res.data)
-    })
+    axios.get<Todolist[]>('https://social-network.samuraijs.com/api/1.1/todo-lists', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }).then(res => setTodolists (res.data[0].id))
   }, [])
 
-  const createTodolist = (title: string) => {}
-
-  const deleteTodolist = (id: string) => {}
+  const createTodolist = (title: string) => {
+    axios.post<BaseResponse<{}>>(
+            'https://social-network.samuraijs.com/api/1.1/todo-lists',
+            { title },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'API-KEY': apiKey,
+              },
+            }
+        )
+        .then(res => {
+          const newTodolist = res.data.data.item
+          setTodolists([newTodolist, ...todolists])
+        })
+  }
+  const deleteTodolist = (id: string) => {
+    axios
+        .delete<DeleteTodolistResponse>(`https://social-network.samuraijs.com/api/1.1/todo-lists/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'API-KEY': apiKey,
+          },
+        })
+        .then(res => console.log(res.data))
+  }
 
   const changeTodolistTitle = (id: string, title: string) => {}
 
@@ -31,7 +63,7 @@ export const AppHttpRequests = () => {
   return (
       <div style={{margin: '20px'}}>
         <CreateItemForm onCreateItem={createTodolist}/>
-        {todolists.map((todolist: any) => (
+        {todolists.map(todolist => (
             <div key={todolist.id} style={container}>
               <div>
                 <EditableSpan value={todolist.title}
@@ -62,4 +94,29 @@ const container: CSSProperties = {
   display: 'flex',
   justifyContent: 'space-between',
   flexDirection: 'column',
+}
+
+
+export type Todolist = {
+  id: []
+  title: string
+  addedDate: string
+  order: number
+}
+
+export type FieldError = {
+  error: string
+  field: string
+}
+
+type CreateTodolistResponse = {
+  data: { item: Todolist }
+  resultCode: number
+  messages: string[]
+  fieldsErrors: FieldError[]
+}
+
+type DeleteTodolistResponse = {
+  data: { item: Todolist }
+
 }
