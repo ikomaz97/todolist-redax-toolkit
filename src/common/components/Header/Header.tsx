@@ -19,11 +19,7 @@ export const Header = () => {
   const theme = getTheme(themeMode)
 
   const changeMode = () => {
-    dispatch(
-      changeThemeModeAC({
-        themeMode: themeMode === "light" ? "dark" : "light",
-      }),
-    )
+    dispatch(changeThemeModeAC({ themeMode: themeMode === "light" ? "dark" : "light" }))
   }
 
   return (
