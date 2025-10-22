@@ -30,8 +30,15 @@ export const tasksSlice = createSlice({
         payload: { todolistId, title, id: nanoid() },
       }),
       (state, action) => {
-        const newTask: Task = { id: action.payload.id, title: action.payload.title, isDone: false }
-        state[action.payload.todolistId].unshift(newTask)
+        const { todolistId, title, id } = action.payload
+        const newTask: Task = { id, title, isDone: false }
+
+        // ✅ Добавляем проверку
+        if (!state[todolistId]) {
+          state[todolistId] = []
+        }
+
+        state[todolistId].unshift(newTask)
       },
     ),
 
