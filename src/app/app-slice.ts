@@ -27,3 +27,4 @@ export const { changeThemeModeAC } = appSlice.actions
 
 // Экспорт reducer
 export const appReducer = appSlice.reducer
+export const { selectThemeMode } = appSlice.selectors
