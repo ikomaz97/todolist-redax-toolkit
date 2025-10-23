@@ -1,38 +1,32 @@
 import { useAppSelector } from "@/common/hooks"
-import { selectTasks } from "@/features/todolists/model/tasks-selectors"
-import type { Todolist } from "@/features/todolists/model/todolists-reducer"
 import { TaskItem } from "./TaskItem/TaskItem"
 import List from "@mui/material/List"
+import type { DomainTodolist } from "@/features/todolists/model/todolists-slice"
 
 type Props = {
-  todolist: Todolist
+  todolist: DomainTodolist
 }
 
 export const Tasks = ({ todolist }: Props) => {
-  const { id, filter } = todolist
+  const tasks = useAppSelector((state) => state.tasks[todolist.id] ?? [])
 
-  const tasks = useAppSelector(selectTasks)
+  // ✅ если массива нет — используем пустой
+  const filteredTasks = tasks.filter((t) => {
+    if (todolist.filter === "active") return !t.isDone
+    if (todolist.filter === "completed") return t.isDone
+    return true
+  })
 
-  const todolistTasks = tasks[id]
-  let filteredTasks = todolistTasks
-  if (filter === "active") {
-    filteredTasks = todolistTasks.filter((task) => !task.isDone)
-  }
-  if (filter === "completed") {
-    filteredTasks = todolistTasks.filter((task) => task.isDone)
+  // ✅ безопасный рендер с проверкой
+  if (!filteredTasks?.length) {
+    return <p>Тасок нет</p>
   }
 
   return (
-    <>
-      {filteredTasks.length === 0 ? (
-        <p>Тасок нет</p>
-      ) : (
-        <List>
-          {filteredTasks.map((task) => (
-            <TaskItem key={task.id} task={task} todolistId={id} />
-          ))}
-        </List>
-      )}
-    </>
+    <List>
+      {filteredTasks.map((task) => (
+        <TaskItem key={task.id} task={task} todolistId={todolist.id} />
+      ))}
+    </List>
   )
 }
