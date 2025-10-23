@@ -4,10 +4,10 @@ import {
   changeTaskTitleAC,
   createTaskAC,
   deleteTaskAC,
-  tasksReducer,
+  tasksReducer, // ✅ используем редьюсер
   type TasksState,
-} from "../tasks-reducer"
-import { createTodolistAC, deleteTodolistAC } from "../todolists-reducer"
+} from "../tasks-slice.ts"
+import { createTodolistAC, deleteTodolistAC } from "../todolists-slice.ts"
 
 let startState: TasksState = {}
 
@@ -98,6 +98,4 @@ test("property with todolistId should be deleted", () => {
 
   expect(keys.length).toBe(1)
   expect(endState["todolistId2"]).not.toBeDefined()
-  // or
-  expect(endState["todolistId2"]).toBeUndefined()
 })
