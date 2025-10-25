@@ -1,6 +1,7 @@
 // Импортируем всё нужное
-import { createSlice, nanoid } from "@reduxjs/toolkit"
+import { createAsyncThunk, createSlice, nanoid } from "@reduxjs/toolkit"
 import type { Todolist as ApiTodolist } from "@/features/todolists/api/todolistsApi.types"
+import { todolistsApi } from "@/features/todolists/api/todolistsApi.ts"
 
 // 🔹 Тип фильтра
 export type FilterValues = "all" | "active" | "completed"
@@ -61,6 +62,14 @@ export const todolistsSlice = createSlice({
       },
     ),
   }),
+})
+
+export const fetchTodolistsTC = createAsyncThunk(`${todolistsSlice.name}/fetchTodolistsTC`, (_, thunkAPI) => {
+  // в санке можно делать побочные эффекты (запросы на сервер)
+  todolistsApi.getTodolists().then((res) => {
+    // и диспатчить экшены (action) или другие санки (thunk)
+    thunkAPI.dispatch(setTodolistsAC({ todolists: res.data }))
+  })
 })
 
 // 🚀 Экспортируем action creators
