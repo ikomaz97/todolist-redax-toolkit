@@ -1,7 +1,7 @@
-import { configureStore } from "@reduxjs/toolkit"
-import { appReducer, appSlice } from "./app-slice"
+import { tasksReducer, tasksSlice } from "@/features/todolists/model/tasks-slice"
 import { todolistsReducer, todolistsSlice } from "@/features/todolists/model/todolists-slice"
-import { tasksReducer, tasksSlice } from "@/features/todolists/model/tasks-slice.ts"
+import { configureStore } from "@reduxjs/toolkit"
+import { appReducer, appSlice } from "./app-slice.ts"
 
 export const store = configureStore({
   reducer: {
