@@ -1,27 +1,22 @@
 import { createSlice, nanoid } from "@reduxjs/toolkit"
-import { createTodolistAC, deleteTodolistAC } from "@/features/todolists/model/todolists-slice.ts"
+import { createTodolistTC, deleteTodolistTC } from "./todolists-slice"
 
-// 🔹 Тип одной задачи
-export type Task = {
-  id: string
-  title: string
-  isDone: boolean
-}
-
-// 🔹 Тип состояния: объект, где ключ — id тудулиста, а значение — массив задач
-export type TasksState = {
-  [todolistId: string]: Task[]
-}
-
-// 🔹 Начальное состояние (по умолчанию — пустое)
-const initialState: TasksState = {}
-
-// 🔹 Создаём slice
 export const tasksSlice = createSlice({
   name: "tasks",
-  initialState,
+  initialState: {} as TasksState,
+  selectors: {
+    selectTasks: (state) => state,
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(createTodolistTC.fulfilled, (state, action) => {
+        state[action.payload.todolist.id] = []
+      })
+      .addCase(deleteTodolistTC.fulfilled, (state, action) => {
+        delete state[action.payload.id]
+      })
+  },
   reducers: (create) => ({
-    // 🗑️ 1. Удаление задачи
     deleteTaskAC: create.reducer<{ todolistId: string; taskId: string }>((state, action) => {
       const tasks = state[action.payload.todolistId]
       const index = tasks.findIndex((task) => task.id === action.payload.taskId)
@@ -29,26 +24,16 @@ export const tasksSlice = createSlice({
         tasks.splice(index, 1)
       }
     }),
-
-    // ➕ 2. Создание новой задачи
     createTaskAC: create.reducer<{ todolistId: string; title: string }>((state, action) => {
-      const newTask: Task = { id: nanoid(), title: action.payload.title, isDone: false }
-      // если у этого тудулиста ещё нет массива задач — создаём
-      if (!state[action.payload.todolistId]) {
-        state[action.payload.todolistId] = []
-      }
+      const newTask: Task = { title: action.payload.title, isDone: false, id: nanoid() }
       state[action.payload.todolistId].unshift(newTask)
     }),
-
-    // ✅ 3. Изменение статуса задачи (выполнена/не выполнена)
     changeTaskStatusAC: create.reducer<{ todolistId: string; taskId: string; isDone: boolean }>((state, action) => {
       const task = state[action.payload.todolistId].find((task) => task.id === action.payload.taskId)
       if (task) {
         task.isDone = action.payload.isDone
       }
     }),
-
-    // ✏️ 4. Изменение названия задачи
     changeTaskTitleAC: create.reducer<{ todolistId: string; taskId: string; title: string }>((state, action) => {
       const task = state[action.payload.todolistId].find((task) => task.id === action.payload.taskId)
       if (task) {
@@ -56,18 +41,16 @@ export const tasksSlice = createSlice({
       }
     }),
   }),
-  extraReducers: (builder) => {
-    builder
-      .addCase(createTodolistAC, (state, action) => {
-        state[action.payload.id] = []
-      })
-      .addCase(deleteTodolistAC, (state, action) => {
-        delete state[action.payload.id]
-      })
-  },
 })
-// 🎯 Экспортируем actions (Redux Toolkit создаёт их автоматически)
-export const { deleteTaskAC, createTaskAC, changeTaskStatusAC, changeTaskTitleAC } = tasksSlice.actions
 
-// 🧠 Экспортируем reducer
+export const { selectTasks } = tasksSlice.selectors
+export const { deleteTaskAC, createTaskAC, changeTaskStatusAC, changeTaskTitleAC } = tasksSlice.actions
 export const tasksReducer = tasksSlice.reducer
+
+export type Task = {
+  id: string
+  title: string
+  isDone: boolean
+}
+
+export type TasksState = Record<string, Task[]>
