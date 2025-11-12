@@ -134,7 +134,7 @@ export const changeTodolistTitleTC = createAsyncThunk(
 )
 
 export const { } = todolistsSlice.selectors
-export const { changeTodolistFilterAC, fetchTodolistsTC, createAsyncThunk,   } = todolistsSlice.actions
+export const { changeTodolistFilterAC,  createAsyncThunk,   } = todolistsSlice.actions
 export const todolistsReducer = todolistsSlice.reducer
 
 export type DomainTodolist = Todolist & {
