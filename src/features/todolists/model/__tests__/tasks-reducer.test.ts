@@ -1,15 +1,15 @@
 import { beforeEach, expect, test } from "vitest"
 import {
-  changeTaskStatusAC,
-  changeTaskTitleAC,
-  createTaskAC,
-  deleteTaskAC,
-  tasksSlice,
-  type TasksState,
-} from "../tasks-slice"
+  changeDomainTaskStatusAC,
+  changeDomainTaskTitleAC,
+  createDomainTaskAC,
+  deleteDomainTaskAC,
+  DomainTasksSlice,
+  type DomainTasksState,
+} from "../DomainTasks-slice"
 import { createTodolistAC, deleteTodolistAC } from "../todolists-slice"
 
-let startState: TasksState = {}
+let startState: DomainTasksState = {}
 
 beforeEach(() => {
   startState = {
@@ -26,8 +26,8 @@ beforeEach(() => {
   }
 })
 
-test("correct task should be deleted", () => {
-  const endState = tasksSlice(startState, deleteTaskAC({ todolistId: "todolistId2", taskId: "2" }))
+test("correct DomainTask should be deleted", () => {
+  const endState = DomainTasksSlice(startState, deleteDomainTaskAC({ todolistId: "todolistId2", DomainTaskId: "2" }))
 
   expect(endState).toEqual({
     todolistId1: [
@@ -42,10 +42,10 @@ test("correct task should be deleted", () => {
   })
 })
 
-test("correct task should be created at correct array", () => {
-  const endState = tasksSlice(
+test("correct DomainTask should be created at correct array", () => {
+  const endState = DomainTasksSlice(
     startState,
-    createTaskAC({
+    createDomainTaskAC({
       todolistId: "todolistId2",
       title: "juice",
     }),
@@ -58,20 +58,20 @@ test("correct task should be created at correct array", () => {
   expect(endState.todolistId2[0].isDone).toBe(false)
 })
 
-test("correct task should change its status", () => {
-  const endState = tasksSlice(
+test("correct DomainTask should change its status", () => {
+  const endState = DomainTasksSlice(
     startState,
-    changeTaskStatusAC({ todolistId: "todolistId2", taskId: "2", isDone: false }),
+    changeDomainTaskStatusAC({ todolistId: "todolistId2", DomainTaskId: "2", isDone: false }),
   )
 
   expect(endState.todolistId2[1].isDone).toBe(false)
   expect(endState.todolistId1[1].isDone).toBe(true)
 })
 
-test("correct task should change its title", () => {
-  const endState = tasksSlice(
+test("correct DomainTask should change its title", () => {
+  const endState = DomainTasksSlice(
     startState,
-    changeTaskTitleAC({ todolistId: "todolistId2", taskId: "2", title: "coffee" }),
+    changeDomainTaskTitleAC({ todolistId: "todolistId2", DomainTaskId: "2", title: "coffee" }),
   )
 
   expect(endState.todolistId2[1].title).toBe("coffee")
@@ -79,7 +79,7 @@ test("correct task should change its title", () => {
 })
 
 test("array should be created for new todolist", () => {
-  const endState = tasksSlice(startState, createTodolistAC("New todolist"))
+  const endState = DomainTasksSlice(startState, createTodolistAC("New todolist"))
 
   const keys = Object.keys(endState)
   const newKey = keys.find((k) => k !== "todolistId1" && k !== "todolistId2")
@@ -92,7 +92,7 @@ test("array should be created for new todolist", () => {
 })
 
 test("property with todolistId should be deleted", () => {
-  const endState = tasksSlice(startState, deleteTodolistAC({ id: "todolistId2" }))
+  const endState = DomainTasksSlice(startState, deleteTodolistAC({ id: "todolistId2" }))
 
   const keys = Object.keys(endState)
 
