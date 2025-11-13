@@ -1,8 +1,10 @@
 import { ListItem, Checkbox } from "@mui/material"
-import { EditableSpan } from "@/common/components/EditableSpan"
+
 import { useAppDispatch } from "@/common/hooks"
 import { deleteTaskAC, changeTaskStatusAC, changeTaskTitleAC } from "@/features/todolists/model/tasks-slice"
-import { DomainTask, TaskStatus } from "@/features/todolists/api/DomainTasksApi"
+import { DomainTask } from "@/features/todolists/api/tasksApi.types.ts"
+import { TaskStatus } from "@/common/enums"
+import { EditableSpan } from "@/common/components"
 
 type Props = {
   task: DomainTask
