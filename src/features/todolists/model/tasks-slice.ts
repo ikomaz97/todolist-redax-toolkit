@@ -1,6 +1,7 @@
 import { nanoid } from "@reduxjs/toolkit"
 import { createTodolistTC, deleteTodolistTC } from "./todolists-slice"
 import { createAppSlice } from "@/common/utils"
+import { tasksApi } from "@/features/todolists/api/tasksApi.ts"
 
 export const tasksSlice = createAppSlice({
   name: "tasks",
@@ -17,7 +18,24 @@ export const tasksSlice = createAppSlice({
         delete state[action.payload.id]
       })
   },
+
   reducers: (create) => ({
+    fetchTasksTC: create.asyncThunk(
+      async (todolistId: string, thunkAPI) => {
+        try {
+          const res = await tasksApi.getTasks(todolistId)
+          return { todolistId, tasks: res.data.items }
+        } catch (error) {
+          return thunkAPI.rejectWithValue(null)
+        }
+      },
+      {
+        fulfilled: (state, action) => {
+          state[action.payload.todolistId] = action.payload.tasks
+        },
+      },
+    ),
+
     deleteTaskAC: create.reducer<{ todolistId: string; taskId: string }>((state, action) => {
       const tasks = state[action.payload.todolistId]
       const index = tasks.findIndex((task) => task.id === action.payload.taskId)
