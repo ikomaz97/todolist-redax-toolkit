@@ -1,7 +1,7 @@
 import { ListItem, Checkbox } from "@mui/material"
 
 import { useAppDispatch } from "@/common/hooks"
-import { deleteTaskAC, changeTaskStatusAC, changeTaskTitleAC } from "@/features/todolists/model/tasks-slice"
+import { changeTaskStatusAC, changeTaskTitleAC, deleteTaskTC } from "@/features/todolists/model/tasks-slice"
 import { DomainTask } from "@/features/todolists/api/tasksApi.types.ts"
 import { TaskStatus } from "@/common/enums"
 import { EditableSpan } from "@/common/components"
@@ -25,7 +25,7 @@ export const TaskItem = ({ task, todolistId }: Props) => {
   }
 
   const deleteTask = () => {
-    dispatch(deleteTaskAC({ todolistId, taskId: task.id }))
+    dispatch(deleteTaskTC({ todolistId, taskId: task.id }))
   }
 
   return (
