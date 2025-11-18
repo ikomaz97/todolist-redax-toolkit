@@ -1,6 +1,6 @@
 import { todolistsApi } from "@/features/todolists/api/todolistsApi"
 import type { Todolist } from "@/features/todolists/api/todolistsApi.types"
-import { createAppSlice } from "@/common/utils"
+
 import { createAppSlice } from "@/common/utils"
 
 export const todolistsSlice = createAppSlice({
