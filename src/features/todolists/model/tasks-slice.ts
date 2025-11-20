@@ -3,8 +3,8 @@ import { tasksApi } from "@/features/todolists/api/tasksApi"
 import { TaskStatus } from "@/common/enums"
 import { RootState } from "@/app/store"
 import { DomainTask, UpdateTaskModel } from "@/features/todolists/api/tasksApi.types"
-import { createTodolistTC, deleteTodolistTC } from "./todolists-slice"
 
+import { createTodolistTC, deleteTodolistTC } from "./todolists-slice"
 export type TasksState = Record<string, DomainTask[]>
 
 export const tasksSlice = createAppSlice({
