@@ -1,159 +1,53 @@
-import { createAppSlice } from "@/common/utils"
-import { tasksApi } from "@/features/todolists/api/tasksApi"
+import { EditableSpan } from "@/common/components/EditableSpan/EditableSpan"
 import { TaskStatus } from "@/common/enums"
-import { RootState } from "@/app/store"
-import { DomainTask, UpdateTaskModel } from "@/features/todolists/api/tasksApi.types"
-import { createTodolistTC, deleteTodolistTC } from "./todolists-slice"
+import { useAppDispatch } from "@/common/hooks"
+import type { DomainTask } from "@/features/todolists/api/tasksApi.types"
+import { deleteTaskTC, updateTaskTC } from "@/features/todolists/model/tasks-slice"
+import DeleteIcon from "@mui/icons-material/Delete"
+import Checkbox from "@mui/material/Checkbox"
+import IconButton from "@mui/material/IconButton"
+import ListItem from "@mui/material/ListItem"
+import type { ChangeEvent } from "react"
+import { getListItemSx } from "./TaskItem.styles"
 
-export type TasksState = Record<string, DomainTask[]>
+type Props = {
+  task: DomainTask
+  todolistId: string
+}
 
-export const tasksSlice = createAppSlice({
-  name: "tasks",
-  initialState: {} as TasksState,
+export const TaskItem = ({ task, todolistId }: Props) => {
+  const dispatch = useAppDispatch()
 
-  selectors: {
-    selectTasks: (state) => state,
-  },
+  const deleteTask = () => {
+    dispatch(deleteTaskTC({ todolistId, taskId: task.id }))
+  }
 
-  reducers: (create) => ({
-    // Получение задач по тудулисту
-    fetchTasksTC: create.asyncThunk(
-      async (todolistId: string, thunkAPI) => {
-        try {
-          const res = await tasksApi.getTasks(todolistId)
-          return { todolistId, tasks: res.data.items }
-        } catch (error) {
-          return thunkAPI.rejectWithValue(null)
-        }
-      },
-      {
-        fulfilled: (state, action) => {
-          state[action.payload.todolistId] = action.payload.tasks
-        },
-      },
-    ),
+  const changeTaskStatus = (e: ChangeEvent<HTMLInputElement>) => {
+    const newStatusValue = e.currentTarget.checked
+    dispatch(
+      updateTaskTC({
+        todolistId,
+        taskId: task.id,
+        domainModel: { status: newStatusValue ? TaskStatus.Completed : TaskStatus.New },
+      }),
+    )
+  }
 
-    // Создание новой задачи через API
-    createTaskTC: create.asyncThunk(
-      async (payload: { todolistId: string; title: string }, thunkAPI) => {
-        try {
-          const res = await tasksApi.createTask(payload)
-          return { task: res.data.data.item }
-        } catch (error) {
-          return thunkAPI.rejectWithValue(null)
-        }
-      },
-      {
-        fulfilled: (state, action) => {
-          const task = action.payload.task
-          state[task.todoListId].unshift(task)
-        },
-      },
-    ),
+  const changeTaskTitle = (title: string) => {
+    dispatch(updateTaskTC({ todolistId, taskId: task.id, domainModel: { title } }))
+  }
 
-    // Удаление задачи через API
-    deleteTaskTC: create.asyncThunk(
-      async (payload: { todolistId: string; taskId: string }, thunkAPI) => {
-        try {
-          await tasksApi.deleteTask(payload)
-          return payload
-        } catch (error) {
-          return thunkAPI.rejectWithValue(null)
-        }
-      },
-      {
-        fulfilled: (state, action) => {
-          const tasks = state[action.payload.todolistId]
-          const index = tasks.findIndex((t) => t.id === action.payload.taskId)
-          if (index !== -1) tasks.splice(index, 1)
-        },
-      },
-    ),
+  const isTaskCompleted = task.status === TaskStatus.Completed
 
-    // Изменение статуса задачи через API
-    changeTaskStatusTC: create.asyncThunk(
-      async (payload: { todolistId: string; taskId: string; status: TaskStatus }, thunkAPI) => {
-        const { todolistId, taskId, status } = payload
-        const allTodolistTasks = (thunkAPI.getState() as RootState).tasks[todolistId]
-        const task = allTodolistTasks?.find((t) => t.id === taskId)
-
-        if (!task) return thunkAPI.rejectWithValue(null)
-
-        const model: UpdateTaskModel = {
-          description: task.description,
-          title: task.title,
-          priority: task.priority,
-          startDate: task.startDate,
-          deadline: task.deadline,
-          status,
-        }
-
-        try {
-          const res = await tasksApi.updateTask({ todolistId, taskId, model })
-          return { task: res.data.data.item }
-        } catch (error) {
-          return thunkAPI.rejectWithValue(null)
-        }
-      },
-      {
-        fulfilled: (state, action) => {
-          const updatedTask = action.payload.task
-          const taskToUpdate = state[updatedTask.todoListId].find((t) => t.id === updatedTask.id)
-          if (taskToUpdate) {
-            taskToUpdate.status = updatedTask.status
-          }
-        },
-      },
-    ),
-
-    // Изменение названия задачи через API
-    changeTaskTitleTC: create.asyncThunk(
-      async (payload: { todolistId: string; taskId: string; title: string }, thunkAPI) => {
-        const { todolistId, taskId, title } = payload
-        const allTodolistTasks = (thunkAPI.getState() as RootState).tasks[todolistId]
-        const task = allTodolistTasks?.find((t) => t.id === taskId)
-
-        if (!task) return thunkAPI.rejectWithValue(null)
-
-        const model: UpdateTaskModel = {
-          description: task.description,
-          title,
-          priority: task.priority,
-          startDate: task.startDate,
-          deadline: task.deadline,
-          status: task.status,
-        }
-
-        try {
-          const res = await tasksApi.updateTask({ todolistId, taskId, model })
-          return { task: res.data.data.item }
-        } catch (error) {
-          return thunkAPI.rejectWithValue(null)
-        }
-      },
-      {
-        fulfilled: (state, action) => {
-          const updatedTask = action.payload.task
-          const taskToUpdate = state[updatedTask.todoListId].find((t) => t.id === updatedTask.id)
-          if (taskToUpdate) {
-            taskToUpdate.title = updatedTask.title
-          }
-        },
-      },
-    ),
-  }),
-
-  extraReducers: (builder) => {
-    builder
-      .addCase(createTodolistTC.fulfilled, (state, action) => {
-        state[action.payload.todolist.id] = []
-      })
-      .addCase(deleteTodolistTC.fulfilled, (state, action) => {
-        delete state[action.payload.id]
-      })
-  },
-})
-
-export const { selectTasks } = tasksSlice.selectors
-export const { fetchTasksTC, createTaskTC, deleteTaskTC, changeTaskStatusTC, changeTaskTitleTC } = tasksSlice.actions
-export const tasksReducer = tasksSlice.reducer
+  return (
+    <ListItem sx={getListItemSx(isTaskCompleted)}>
+      <div>
+        <Checkbox checked={isTaskCompleted} onChange={changeTaskStatus} />
+        <EditableSpan value={task.title} onChange={changeTaskTitle} />
+      </div>
+      <IconButton onClick={deleteTask}>
+        <DeleteIcon />
+      </IconButton>
+    </ListItem>
+  )
+}
