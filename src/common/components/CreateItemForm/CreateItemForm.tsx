@@ -8,7 +8,7 @@ type Props = {
   disabled?: boolean
 }
 
-export const CreateItemForm = ({ onCreateItem }: Props) => {
+export const CreateItemForm = ({ onCreateItem, disabled }: Props) => {
   const [title, setTitle] = useState("")
   const [error, setError] = useState<string | null>(null)
 
@@ -44,6 +44,7 @@ export const CreateItemForm = ({ onCreateItem }: Props) => {
         helperText={error}
         onChange={changeTitleHandler}
         onKeyDown={createItemOnEnterHandler}
+        disabled={disabled}
       />
       <IconButton onClick={createItemHandler} color={"primary"}>
         <AddBoxIcon />
