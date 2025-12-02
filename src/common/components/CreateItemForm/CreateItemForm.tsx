@@ -5,6 +5,7 @@ import IconButton from "@mui/material/IconButton"
 
 type Props = {
   onCreateItem: (title: string) => void
+  disabled?: boolean
 }
 
 export const CreateItemForm = ({ onCreateItem }: Props) => {
