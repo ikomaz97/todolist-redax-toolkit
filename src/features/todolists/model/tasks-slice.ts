@@ -1,9 +1,10 @@
-import { setAppStatusAC } from "@/app/app-slice"
+import { setAppStatusAC, setAppErrorAC } from "@/app/app-slice"
 import type { RootState } from "@/app/store"
-import { createAppSlice } from "@/common/utils"
+import { createAppSlice, handleServerAppError, handleServerNetworkError } from "@/common/utils"
 import { tasksApi } from "@/features/todolists/api/tasksApi"
 import type { DomainTask, UpdateTaskModel } from "@/features/todolists/api/tasksApi.types"
 import { createTodolistTC, deleteTodolistTC } from "./todolists-slice"
+import { ResultCode } from "@/common/enums" // <- подставь реальный путь к enum'ам
 
 export const tasksSlice = createAppSlice({
   name: "tasks",
@@ -30,6 +31,7 @@ export const tasksSlice = createAppSlice({
           return { todolistId, tasks: res.data.items }
         } catch (error) {
           dispatch(setAppStatusAC({ status: "failed" }))
+          dispatch(setAppErrorAC({ error: "Failed to fetch tasks" }))
           return rejectWithValue(null)
         }
       },
@@ -44,10 +46,16 @@ export const tasksSlice = createAppSlice({
         try {
           dispatch(setAppStatusAC({ status: "loading" }))
           const res = await tasksApi.createTask(payload)
-          dispatch(setAppStatusAC({ status: "succeeded" }))
-          return { task: res.data.data.item }
+
+          if (res.data.resultCode === ResultCode.Success) {
+            dispatch(setAppStatusAC({ status: "succeeded" }))
+            return { task: res.data.data.item }
+          } else {
+            handleServerAppError(res.data, dispatch)
+            return rejectWithValue(null)
+          }
         } catch (error) {
-          dispatch(setAppStatusAC({ status: "failed" }))
+          handleServerNetworkError(error, dispatch)
           return rejectWithValue(null)
         }
       },
@@ -61,11 +69,22 @@ export const tasksSlice = createAppSlice({
       async (payload: { todolistId: string; taskId: string }, { dispatch, rejectWithValue }) => {
         try {
           dispatch(setAppStatusAC({ status: "loading" }))
-          await tasksApi.deleteTask(payload)
-          dispatch(setAppStatusAC({ status: "succeeded" }))
-          return payload
-        } catch (error) {
+          const res = await tasksApi.deleteTask(payload)
+          // Если API возвращает resultCode для удаления — проверяй его тоже:
+          if (res.data?.resultCode === undefined || res.data.resultCode === ResultCode.Success) {
+            dispatch(setAppStatusAC({ status: "succeeded" }))
+            return payload
+          } else {
+            const message =
+              res.data.messages && res.data.messages.length ? res.data.messages[0] : "Failed to delete task"
+            dispatch(setAppErrorAC({ error: message }))
+            dispatch(setAppStatusAC({ status: "failed" }))
+            return rejectWithValue(null)
+          }
+        } catch (error: any) {
           dispatch(setAppStatusAC({ status: "failed" }))
+          const errMessage = (error as Error)?.message || "Failed to delete task"
+          dispatch(setAppErrorAC({ error: errMessage }))
           return rejectWithValue(null)
         }
       },
@@ -106,9 +125,19 @@ export const tasksSlice = createAppSlice({
         try {
           dispatch(setAppStatusAC({ status: "loading" }))
           const res = await tasksApi.updateTask({ todolistId, taskId, model })
-          dispatch(setAppStatusAC({ status: "succeeded" }))
-          return { task: res.data.data.item }
-        } catch (error) {
+          if (res.data.resultCode === ResultCode.Success) {
+            return { task: res.data.data.item }
+          } else {
+            if (res.data.messages.length) {
+              dispatch(setAppErrorAC({ error: res.data.messages[0] }))
+            } else {
+              dispatch(setAppErrorAC({ error: "Some error occurred" }))
+            }
+            dispatch(setAppStatusAC({ status: "failed" }))
+            return rejectWithValue(null)
+          }
+        } catch (error: any) {
+          dispatch(setAppErrorAC({ error: error.message }))
           dispatch(setAppStatusAC({ status: "failed" }))
           return rejectWithValue(null)
         }
