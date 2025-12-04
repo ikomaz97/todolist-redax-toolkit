@@ -1,34 +1,37 @@
+import { createSlice, PayloadAction } from "@reduxjs/toolkit"
+import type { RootState } from "./store"
 import type { RequestStatus } from "@/common/types"
-import { createSlice } from "@reduxjs/toolkit"
+
+export type ThemeMode = "dark" | "light"
+
+const initialState = {
+  themeMode: "light" as ThemeMode,
+  status: "idle" as RequestStatus,
+  error: null as string | null,
+}
+
+export type AppState = typeof initialState
 
 export const appSlice = createSlice({
   name: "app",
-  initialState: {
-    themeMode: "light" as ThemeMode,
-    status: "idle" as RequestStatus,
-    error: null as string | null,
-  },
-  selectors: {
-    selectThemeMode: (state) => state.themeMode,
-    selectAppStatus: (state) => state.status,
-    selectAppError: (state) => state.error, // Новый селектор
-  },
-  reducers: (create) => ({
-    changeThemeModeAC: create.reducer<{ themeMode: ThemeMode }>((state, action) => {
+  initialState,
+  reducers: {
+    changeThemeModeAC(state, action: PayloadAction<{ themeMode: ThemeMode }>) {
       state.themeMode = action.payload.themeMode
-    }),
-    setAppStatusAC: create.reducer<{ status: RequestStatus }>((state, action) => {
+    },
+    setAppStatusAC(state, action: PayloadAction<{ status: RequestStatus }>) {
       state.status = action.payload.status
-    }),
-    setAppErrorAC: create.reducer<{ error: string | null }>((state, action) => {
-      // Новый action creator
+    },
+    setAppErrorAC(state, action: PayloadAction<{ error: string | null }>) {
       state.error = action.payload.error
-    }),
-  }),
+    },
+  },
 })
 
-export const { selectThemeMode, selectAppStatus, selectAppError } = appSlice.selectors
-export const { changeThemeModeAC, setAppStatusAC, setAppErrorAC } = appSlice.actions
 export const appReducer = appSlice.reducer
+export const { changeThemeModeAC, setAppStatusAC, setAppErrorAC } = appSlice.actions
 
-export type ThemeMode = "dark" | "light"
+// Селекторы должны принимать RootState (корневой state), а не AppState
+export const selectThemeMode = (state: RootState) => state.app.themeMode
+export const selectAppStatus = (state: RootState) => state.app.status
+export const selectAppError = (state: RootState) => state.app.error
