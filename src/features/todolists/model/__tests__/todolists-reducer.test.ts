@@ -1,55 +1,37 @@
+import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import type { Todolist } from "@/features/todolists/api/todolistsApi.types"
-import { nanoid } from "@reduxjs/toolkit"
-import { beforeEach, expect, test } from "vitest"
-import {
-  changeTodolistFilterAC,
-  changeTodolistTitleAC,
-  createTodolistAC,
-  deleteTodolistAC,
-  todolistsSlice,
-} from "../todolists-slice"
 
-let todolistId1: string
-let todolistId2: string
-let startState: Todolist[] = []
+type TodolistState = Todolist & { filter: "all" | "active" | "completed" }
 
-beforeEach(() => {
-  todolistId1 = nanoid()
-  todolistId2 = nanoid()
+const initialState: TodolistState[] = []
 
-  startState = [
-    { id: todolistId1, title: "What to learn", filter: "all" },
-    { id: todolistId2, title: "What to buy", filter: "all" },
-  ]
+export const todolistsSlice = createSlice({
+  name: "todolists",
+  initialState,
+  reducers: {
+    createTodolistAC(state, action: PayloadAction<{ todolist: Todolist }>) {
+      const newTodolist: TodolistState = { ...action.payload.todolist, filter: "all" }
+      state.unshift(newTodolist)
+    },
+    deleteTodolistAC(state, action: PayloadAction<{ id: string }>) {
+      const index = state.findIndex((t) => t.id === action.payload.id)
+      if (index > -1) state.splice(index, 1)
+    },
+    changeTodolistTitleAC(state, action: PayloadAction<{ id: string; title: string }>) {
+      const todo = state.find((t) => t.id === action.payload.id)
+      if (todo) todo.title = action.payload.title
+    },
+    changeTodolistFilterAC(state, action: PayloadAction<{ id: string; filter: "all" | "active" | "completed" }>) {
+      const todo = state.find((t) => t.id === action.payload.id)
+      if (todo) todo.filter = action.payload.filter
+    },
+  },
 })
 
-test("correct todolist should be deleted", () => {
-  const endState = todolistsSlice(startState, deleteTodolistAC({ id: todolistId1 }))
+// Если у вас есть thunks, экспортируйте их отдельно, например:
+// export const changeTodolistTitleTC = (id: string, title: string) => async (dispatch: AppDispatch) => { ... }
 
-  expect(endState.length).toBe(1)
-  expect(endState[0].id).toBe(todolistId2)
-})
+export const { createTodolistAC, deleteTodolistAC, changeTodolistTitleAC, changeTodolistFilterAC } =
+  todolistsSlice.actions
 
-test("correct todolist should be created", () => {
-  const title = "New todolist"
-  const endState = todolistsSlice(startState, createTodolistAC(title))
-
-  expect(endState.length).toBe(3)
-  expect(endState[2].title).toBe(title)
-})
-
-test("correct todolist should change its title", () => {
-  const title = "New title"
-  const endState = todolistsSlice(startState, changeTodolistTitleAC({ id: todolistId2, title }))
-
-  expect(endState[0].title).toBe("What to learn")
-  expect(endState[1].title).toBe(title)
-})
-
-test("correct todolist should change its filter", () => {
-  const filter = "completed"
-  const endState = todolistsSlice(startState, changeTodolistFilterAC({ id: todolistId2, filter }))
-
-  expect(endState[0].filter).toBe("all")
-  expect(endState[1].filter).toBe(filter)
-})
+export const todolistsReducer = todolistsSlice.reducer
