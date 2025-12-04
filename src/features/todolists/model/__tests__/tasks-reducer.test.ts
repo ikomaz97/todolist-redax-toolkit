@@ -7,7 +7,7 @@ import {
   DomainTasksSlice,
   type DomainTasksState,
 } from "../DomainTasks-slice"
-import { createTodolistAC, deleteTodolistAC } from "../todolists-slice"
+import { createTodolistTC, deleteTodolistTC } from "../todolists-slice"
 
 let startState: DomainTasksState = {}
 
@@ -79,7 +79,7 @@ test("correct DomainTask should change its title", () => {
 })
 
 test("array should be created for new todolist", () => {
-  const endState = DomainTasksSlice(startState, createTodolistAC("New todolist"))
+  const endState = DomainTasksSlice(startState, createTodolistTC("New todolist"))
 
   const keys = Object.keys(endState)
   const newKey = keys.find((k) => k !== "todolistId1" && k !== "todolistId2")
@@ -92,7 +92,7 @@ test("array should be created for new todolist", () => {
 })
 
 test("property with todolistId should be deleted", () => {
-  const endState = DomainTasksSlice(startState, deleteTodolistAC({ id: "todolistId2" }))
+  const endState = DomainTasksSlice(startState, deleteTodolistTC({ id: "todolistId2" }))
 
   const keys = Object.keys(endState)
 
