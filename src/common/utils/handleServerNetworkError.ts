@@ -1,8 +1,8 @@
-import { setAppErrorAC, setAppStatusAC } from "@/app/app-slice.ts"
+import { setAppErrorAC, setAppStatusAC } from "@/app/app-slice"
 import type { Dispatch } from "@reduxjs/toolkit"
 import axios from "axios"
 
-export const handleServerNetworkError = (error: unknown, dispatch: Dispatch) => {
+export const handleServerNetworkError = (dispatch: Dispatch, error: unknown) => {
   let errorMessage
 
   if (axios.isAxiosError(error)) {
