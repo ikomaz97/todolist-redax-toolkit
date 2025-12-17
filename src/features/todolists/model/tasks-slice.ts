@@ -1,10 +1,10 @@
-import { setAppStatusAC, setAppErrorAC } from "@/app/app-slice"
+import { setAppStatusAC } from "@/app/app-slice"
 import type { RootState } from "@/app/store"
+import { ResultCode } from "@/common/enums"
 import { createAppSlice, handleServerAppError, handleServerNetworkError } from "@/common/utils"
 import { tasksApi } from "@/features/todolists/api/tasksApi"
 import type { DomainTask, UpdateTaskModel } from "@/features/todolists/api/tasksApi.types"
 import { createTodolistTC, deleteTodolistTC } from "./todolists-slice"
-import { ResultCode } from "@/common/enums" // <- подставь реальный путь к enum'ам
 
 export const tasksSlice = createAppSlice({
   name: "tasks",
@@ -30,8 +30,7 @@ export const tasksSlice = createAppSlice({
           dispatch(setAppStatusAC({ status: "succeeded" }))
           return { todolistId, tasks: res.data.items }
         } catch (error) {
-          dispatch(setAppStatusAC({ status: "failed" }))
-          dispatch(setAppErrorAC({ error: "Failed to fetch tasks" }))
+          handleServerNetworkError(dispatch, error)
           return rejectWithValue(null)
         }
       },
@@ -46,7 +45,6 @@ export const tasksSlice = createAppSlice({
         try {
           dispatch(setAppStatusAC({ status: "loading" }))
           const res = await tasksApi.createTask(payload)
-
           if (res.data.resultCode === ResultCode.Success) {
             dispatch(setAppStatusAC({ status: "succeeded" }))
             return { task: res.data.data.item }
@@ -55,7 +53,7 @@ export const tasksSlice = createAppSlice({
             return rejectWithValue(null)
           }
         } catch (error) {
-          handleServerNetworkError(error, dispatch)
+          handleServerNetworkError(dispatch, error)
           return rejectWithValue(null)
         }
       },
@@ -70,21 +68,15 @@ export const tasksSlice = createAppSlice({
         try {
           dispatch(setAppStatusAC({ status: "loading" }))
           const res = await tasksApi.deleteTask(payload)
-          // Если API возвращает resultCode для удаления — проверяй его тоже:
-          if (res.data?.resultCode === undefined || res.data.resultCode === ResultCode.Success) {
+          if (res.data.resultCode === ResultCode.Success) {
             dispatch(setAppStatusAC({ status: "succeeded" }))
             return payload
           } else {
-            const message =
-              res.data.messages && res.data.messages.length ? res.data.messages[0] : "Failed to delete task"
-            dispatch(setAppErrorAC({ error: message }))
-            dispatch(setAppStatusAC({ status: "failed" }))
+            handleServerAppError(res.data, dispatch)
             return rejectWithValue(null)
           }
-        } catch (error: any) {
-          dispatch(setAppStatusAC({ status: "failed" }))
-          const errMessage = (error as Error)?.message || "Failed to delete task"
-          dispatch(setAppErrorAC({ error: errMessage }))
+        } catch (error) {
+          handleServerNetworkError(dispatch, error)
           return rejectWithValue(null)
         }
       },
@@ -126,19 +118,14 @@ export const tasksSlice = createAppSlice({
           dispatch(setAppStatusAC({ status: "loading" }))
           const res = await tasksApi.updateTask({ todolistId, taskId, model })
           if (res.data.resultCode === ResultCode.Success) {
+            dispatch(setAppStatusAC({ status: "succeeded" }))
             return { task: res.data.data.item }
           } else {
-            if (res.data.messages.length) {
-              dispatch(setAppErrorAC({ error: res.data.messages[0] }))
-            } else {
-              dispatch(setAppErrorAC({ error: "Some error occurred" }))
-            }
-            dispatch(setAppStatusAC({ status: "failed" }))
+            handleServerAppError(res.data, dispatch)
             return rejectWithValue(null)
           }
-        } catch (error: any) {
-          dispatch(setAppErrorAC({ error: error.message }))
-          dispatch(setAppStatusAC({ status: "failed" }))
+        } catch (error) {
+          handleServerNetworkError(dispatch, error)
           return rejectWithValue(null)
         }
       },
