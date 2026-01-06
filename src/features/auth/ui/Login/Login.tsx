@@ -59,13 +59,13 @@ export const Login: React.FC = () => {
         </FormLabel>
 
         <FormGroup>
-          <TextField
-            label="Email"
-            margin="normal"
-            {...register("email")}
-            error={!!errors.email}
-            helperText={errors.email?.message}
-          />
+          {/*<TextField*/}
+          {/*  label="Email"*/}
+          {/*  margin="normal"*/}
+          {/*  {...register("email")}*/}
+          {/*  error={!!errors.email}*/}
+          {/*  helperText={errors.email?.message}*/}
+          {/*/>*/}
 
           <TextField
             type="password"
