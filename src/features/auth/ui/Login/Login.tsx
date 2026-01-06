@@ -1,3 +1,7 @@
+import React from "react"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm, Controller } from "react-hook-form"
+
 import { selectThemeMode } from "@/app/app-slice"
 import { useAppSelector } from "@/common/hooks"
 import { getTheme } from "@/common/theme"
@@ -9,16 +13,30 @@ import FormGroup from "@mui/material/FormGroup"
 import FormLabel from "@mui/material/FormLabel"
 import Grid from "@mui/material/Grid2"
 import TextField from "@mui/material/TextField"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { LoginInputs, loginSchema } from "@/features/auth/lib/schemas"
 
-export const Login = () => {
+export const Login: React.FC = () => {
   const themeMode = useAppSelector(selectThemeMode)
-
   const theme = getTheme(themeMode)
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<LoginInputs>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "", rememberMe: false },
+  })
+
+  const onSubmit = (data: LoginInputs) => {
+    console.log("Submit:", data)
+    // reset() // по необходимости
+  }
 
   return (
     <Grid container justifyContent={"center"}>
-      <FormControl>
+      <FormControl component="form" onSubmit={handleSubmit(onSubmit)}>
         <FormLabel>
           <p>
             To login get registered
@@ -39,10 +57,38 @@ export const Login = () => {
             <b>Password:</b> free
           </p>
         </FormLabel>
+
         <FormGroup>
-          <TextField label="Email" margin="normal" />
-          <TextField type="password" label="Password" margin="normal" />
-          <FormControlLabel label="Remember me" control={<Checkbox />} />
+          <TextField
+            label="Email"
+            margin="normal"
+            {...register("email")}
+            error={!!errors.email}
+            helperText={errors.email?.message}
+          />
+
+          <TextField
+            type="password"
+            label="Password"
+            margin="normal"
+            {...register("password")}
+            error={!!errors.password}
+            helperText={errors.password?.message}
+          />
+
+          <Controller
+            name="rememberMe"
+            control={control}
+            render={({ field }) => (
+              <FormControlLabel
+                control={
+                  <Checkbox {...field} checked={!!field.value} onChange={(e) => field.onChange(e.target.checked)} />
+                }
+                label="Remember me"
+              />
+            )}
+          />
+
           <Button type="submit" variant="contained" color="primary">
             Login
           </Button>
