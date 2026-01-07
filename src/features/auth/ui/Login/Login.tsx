@@ -1,99 +1,53 @@
-import React from "react"
+import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm, Controller } from "react-hook-form"
 
-import { selectThemeMode } from "@/app/app-slice"
-import { useAppSelector } from "@/common/hooks"
-import { getTheme } from "@/common/theme"
-import Button from "@mui/material/Button"
-import Checkbox from "@mui/material/Checkbox"
-import FormControl from "@mui/material/FormControl"
-import FormControlLabel from "@mui/material/FormControlLabel"
-import FormGroup from "@mui/material/FormGroup"
-import FormLabel from "@mui/material/FormLabel"
-import Grid from "@mui/material/Grid2"
-import TextField from "@mui/material/TextField"
+import { TextField, Grid, FormControl, FormGroup, Button } from "@mui/material"
 import { LoginInputs, loginSchema } from "@/features/auth/lib/schemas"
 
-export const Login: React.FC = () => {
-  const themeMode = useAppSelector(selectThemeMode)
-  const theme = getTheme(themeMode)
-
+export const Login = () => {
   const {
     register,
     handleSubmit,
-    control,
     formState: { errors },
   } = useForm<LoginInputs>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "", rememberMe: false },
+    // при желании можно включить триггеры: mode: 'onBlur' | 'onChange'
   })
 
   const onSubmit = (data: LoginInputs) => {
-    console.log("Submit:", data)
-    // reset() // по необходимости
+    console.log(data)
   }
 
   return (
     <Grid container justifyContent={"center"}>
-      <FormControl component="form" onSubmit={handleSubmit(onSubmit)}>
-        <FormLabel>
-          <p>
-            To login get registered
-            <a
-              style={{ color: theme.palette.primary.main, marginLeft: "5px" }}
-              href="https://social-network.samuraijs.com"
-              target="_blank"
-              rel="noreferrer"
-            >
-              here
-            </a>
-          </p>
-          <p>or use common test account credentials:</p>
-          <p>
-            <b>Email:</b> free@samuraijs.com
-          </p>
-          <p>
-            <b>Password:</b> free
-          </p>
-        </FormLabel>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <FormControl>
+          <FormGroup>
+            <TextField
+              label="Email"
+              margin="normal"
+              error={!!errors.email}
+              helperText={errors.email ? String(errors.email.message) : ""}
+              {...register("email")}
+            />
 
-        <FormGroup>
-          {/*<TextField*/}
-          {/*  label="Email"*/}
-          {/*  margin="normal"*/}
-          {/*  {...register("email")}*/}
-          {/*  error={!!errors.email}*/}
-          {/*  helperText={errors.email?.message}*/}
-          {/*/>*/}
+            <TextField
+              label="Пароль"
+              type="password"
+              margin="normal"
+              error={!!errors.password}
+              helperText={errors.password ? String(errors.password.message) : ""}
+              {...register("password")}
+            />
 
-          <TextField
-            type="password"
-            label="Password"
-            margin="normal"
-            {...register("password")}
-            error={!!errors.password}
-            helperText={errors.password?.message}
-          />
+            {/* пример для чекбокса: */}
+            {/* <Controller ... /> или register('rememberMe') с Checkbox */}
 
-          <Controller
-            name="rememberMe"
-            control={control}
-            render={({ field }) => (
-              <FormControlLabel
-                control={
-                  <Checkbox {...field} checked={!!field.value} onChange={(e) => field.onChange(e.target.checked)} />
-                }
-                label="Remember me"
-              />
-            )}
-          />
-
-          <Button type="submit" variant="contained" color="primary">
-            Login
-          </Button>
-        </FormGroup>
-      </FormControl>
+            <Button type="submit">Войти</Button>
+          </FormGroup>
+        </FormControl>
+      </form>
     </Grid>
   )
 }
