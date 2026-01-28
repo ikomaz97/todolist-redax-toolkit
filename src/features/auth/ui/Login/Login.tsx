@@ -2,6 +2,7 @@ import { selectThemeMode } from "@/app/app-slice"
 import { useAppDispatch, useAppSelector } from "@/common/hooks"
 import { getTheme } from "@/common/theme"
 import { type LoginInputs, loginSchema } from "@/features/auth/lib/schemas"
+import { loginTC } from "@/features/auth/model/auth-slice"
 import { zodResolver } from "@hookform/resolvers/zod"
 import Button from "@mui/material/Button"
 import Checkbox from "@mui/material/Checkbox"
@@ -13,20 +14,13 @@ import Grid from "@mui/material/Grid"
 import TextField from "@mui/material/TextField"
 import { Controller, type SubmitHandler, useForm } from "react-hook-form"
 import styles from "./Login.module.css"
-import { loginTC, selectIsLoggedIn } from "@/features/auth/model/auth-slice.ts"
-import { useNavigate } from "react-router"
-import { Path } from "@/common/routing"
-import { useEffect } from "react"
 
 export const Login = () => {
   const themeMode = useAppSelector(selectThemeMode)
-  const isLoggedIn = useAppSelector(selectIsLoggedIn)
-
-  const theme = getTheme(themeMode)
 
   const dispatch = useAppDispatch()
 
-  const navigate = useNavigate()
+  const theme = getTheme(themeMode)
 
   const {
     register,
@@ -40,17 +34,9 @@ export const Login = () => {
   })
 
   const onSubmit: SubmitHandler<LoginInputs> = (data) => {
-    // запускаем авторизацию — навигация произойдёт в useEffect после того, как isLoggedIn станет true
     dispatch(loginTC(data))
-    // reset() // если нужно очищать форму после успешного логина — делать в useEffect после проверки isLoggedIn
+    reset()
   }
-
-  // Навигируем при изменении isLoggedIn
-  useEffect(() => {
-    if (isLoggedIn) {
-      navigate(Path.Main)
-    }
-  }, [isLoggedIn, navigate])
 
   return (
     <Grid container justifyContent={"center"}>
@@ -83,7 +69,7 @@ export const Login = () => {
               type="password"
               label="Password"
               margin="normal"
-              error={!!errors.password} // <- фикс: раньше было errors.email
+              error={!!errors.email}
               {...register("password")}
             />
             {errors.password && <span className={styles.errorMessage}>{errors.password.message}</span>}

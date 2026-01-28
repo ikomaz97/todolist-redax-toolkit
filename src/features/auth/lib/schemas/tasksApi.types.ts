@@ -10,7 +10,7 @@ export const domainTaskSchema = z.object({
   deadline: z.string().nullable(),
   id: z.string(),
   todoListId: z.string(),
-  order: z.int(),
+  order: z(),
   addedDate: z.string(),
 })
 
