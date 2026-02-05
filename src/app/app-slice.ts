@@ -7,6 +7,7 @@ export const appSlice = createSlice({
     themeMode: "light" as ThemeMode,
     status: "idle" as RequestStatus,
     error: null as string | null,
+      isLoggedIn: false,
   },
   selectors: {
     selectThemeMode: (state) => state.themeMode,
