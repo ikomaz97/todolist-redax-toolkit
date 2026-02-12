@@ -1,29 +1,48 @@
 import "./App.css"
 
+import { useEffect, useState } from "react"
+
 import CssBaseline from "@mui/material/CssBaseline"
 import { ThemeProvider } from "@mui/material/styles"
 import { CircularProgress } from "@mui/material"
 
 import styles from "./App.module.css"
 
-import { selectThemeMode } from "@/app/app-slice"
-import { useAppSelector } from "@/common/hooks"
+import { selectThemeMode, setIsLoggedInAC } from "@/app/app-slice"
+import { useAppDispatch, useAppSelector } from "@/common/hooks"
 import { getTheme } from "@/common/theme"
 
 import { Header, ErrorSnackbar } from "@/common/components"
 import { Routing } from "@/common/routing"
 
-import { useMeQuery } from "@/features/auth/api/authApi.ts"
+import { useMeQuery } from "@/features/auth/api/authApi"
+import { ResultCode } from "@/common/enums"
 
 export const App = () => {
     const themeMode = useAppSelector(selectThemeMode)
+    const dispatch = useAppDispatch()
+
     const theme = getTheme(themeMode)
 
-    // ✅ просто проверяем авторизацию
-    const { isLoading } = useMeQuery()
+    // ✅ флаг инициализации приложения
+    const [isInitialized, setIsInitialized] = useState(false)
 
-    // ✅ пока идет запрос — показываем loader
-    if (isLoading) {
+    // ✅ запрос "кто я"
+    const { data, isLoading } = useMeQuery()
+
+    // ✅ логика инициализации
+    useEffect(() => {
+        if (isLoading) return
+
+        if (data?.resultCode === ResultCode.Success) {
+            dispatch(setIsLoggedInAC({ isLoggedIn: true }))
+        }
+
+        setIsInitialized(true)
+    }, [isLoading, data, dispatch])
+
+    // ✅ пока приложение не готово — показываем loader
+    if (!isInitialized) {
         return (
             <div className={styles.circularProgressContainer}>
                 <CircularProgress size={150} thickness={3} />
