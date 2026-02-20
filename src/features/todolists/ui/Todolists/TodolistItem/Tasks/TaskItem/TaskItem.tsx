@@ -1,55 +1,67 @@
-import { EditableSpan } from "@/common/components/EditableSpan/EditableSpan"
 import { TaskStatus } from "@/common/enums"
-import { useAppDispatch } from "@/common/hooks"
-import type { DomainTask } from "@/features/todolists/api/tasksApi.types"
-import { deleteTaskTC, updateTaskTC } from "@/features/todolists/model/tasks-slice"
-import type { DomainTodolist } from "@/features/todolists/model/todolists-slice"
-import DeleteIcon from "@mui/icons-material/Delete"
+import { useDeleteTaskMutation, useUpdateTaskMutation } from "@/features/todolists/api/tasksApi"
 import Checkbox from "@mui/material/Checkbox"
 import IconButton from "@mui/material/IconButton"
-import ListItem from "@mui/material/ListItem"
-import type { ChangeEvent } from "react"
-import { getListItemSx } from "./TaskItem.styles"
+import DeleteIcon from "@mui/icons-material/Delete"
+import TextField from "@mui/material/TextField"
+import { useState, ChangeEvent } from "react"
+import type { DomainTask } from "@/features/todolists/api/tasksApi.types"
+import type { DomainTodolist } from "@/features/todolists/model/todolists-slice"
 
 type Props = {
-  task: DomainTask
-  todolist: DomainTodolist
+    task: DomainTask
+    todolist: DomainTodolist
 }
 
 export const TaskItem = ({ task, todolist }: Props) => {
-  const dispatch = useAppDispatch()
+    const [updateTask] = useUpdateTaskMutation()
+    const [deleteTask] = useDeleteTaskMutation()
 
-  const deleteTask = () => {
-    dispatch(deleteTaskTC({ todolistId: todolist.id, taskId: task.id }))
-  }
+    const [editTitle, setEditTitle] = useState(task.title)
+    const [isEditing, setIsEditing] = useState(false)
 
-  const changeTaskStatus = (e: ChangeEvent<HTMLInputElement>) => {
-    const newStatusValue = e.currentTarget.checked
-    dispatch(
-      updateTaskTC({
-        todolistId: todolist.id,
-        taskId: task.id,
-        domainModel: { status: newStatusValue ? TaskStatus.Completed : TaskStatus.New },
-      }),
+    const onDelete = () => {
+        deleteTask({ todolistId: todolist.id, taskId: task.id })
+    }
+
+    const onStatusChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const status = e.currentTarget.checked ? TaskStatus.Completed : TaskStatus.New
+        updateTask({
+            todolistId: todolist.id,
+            taskId: task.id,
+            model: { ...task, status },
+        })
+    }
+
+    const onTitleBlur = () => {
+        setIsEditing(false)
+        if (editTitle !== task.title) {
+            updateTask({
+                todolistId: todolist.id,
+                taskId: task.id,
+                model: { ...task, title: editTitle },
+            })
+        }
+    }
+
+    return (
+        <div style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}>
+            <Checkbox checked={task.status === TaskStatus.Completed} onChange={onStatusChange} />
+            {isEditing ? (
+                <TextField
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    onBlur={onTitleBlur}
+                    size="small"
+                />
+            ) : (
+                <span onDoubleClick={() => setIsEditing(true)} style={{ flex: 1 }}>
+          {task.title}
+        </span>
+            )}
+            <IconButton onClick={onDelete}>
+                <DeleteIcon />
+            </IconButton>
+        </div>
     )
-  }
-
-  const changeTaskTitle = (title: string) => {
-    dispatch(updateTaskTC({ todolistId: todolist.id, taskId: task.id, domainModel: { title } }))
-  }
-
-  const isTaskCompleted = task.status === TaskStatus.Completed
-  const disabled = todolist.entityStatus === "loading"
-
-  return (
-    <ListItem sx={getListItemSx(isTaskCompleted)}>
-      <div>
-        <Checkbox checked={isTaskCompleted} onChange={changeTaskStatus} disabled={disabled} />
-        <EditableSpan value={task.title} onChange={changeTaskTitle} disabled={disabled} />
-      </div>
-      <IconButton onClick={deleteTask} disabled={disabled}>
-        <DeleteIcon />
-      </IconButton>
-    </ListItem>
-  )
 }
