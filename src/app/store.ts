@@ -2,16 +2,14 @@ import { configureStore } from "@reduxjs/toolkit"
 import { setupListeners } from "@reduxjs/toolkit/query"
 
 import { appReducer } from "@/app/app-slice"
-import { tasksReducer, tasksSlice } from "@/features/todolists/model/tasks-slice"
 import { todolistsReducer, todolistsSlice } from "@/features/todolists/model/todolists-slice"
 import { baseApi } from "@/app/baseApi.ts"
 
 export const store = configureStore({
     reducer: {
-        app: appReducer,                  // ✅ здесь app
-        [tasksSlice.name]: tasksReducer,
+        app: appReducer,                  // ✅ app slice
         [todolistsSlice.name]: todolistsReducer,
-        [baseApi.reducerPath]: baseApi.reducer,
+        [baseApi.reducerPath]: baseApi.reducer, // ✅ RTK Query
     },
     middleware: getDefaultMiddleware =>
         getDefaultMiddleware().concat(baseApi.middleware),
