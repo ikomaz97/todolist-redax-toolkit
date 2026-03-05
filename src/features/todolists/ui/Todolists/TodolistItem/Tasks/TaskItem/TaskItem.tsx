@@ -1,67 +1,52 @@
+import { EditableSpan } from "@/common/components/EditableSpan/EditableSpan"
 import { TaskStatus } from "@/common/enums"
-import { useDeleteTaskMutation, useUpdateTaskMutation } from "@/features/todolists/api/tasksApi"
+import { useRemoveTaskMutation, useUpdateTaskMutation } from "@/features/todolists/api/tasksApi"
+import type { DomainTask } from "@/features/todolists/api/tasksApi.types"
+import { createTaskModel } from "@/features/todolists/lib/utils"
+import type { DomainTodolist } from "@/features/todolists/model/todolists-slice"
+import DeleteIcon from "@mui/icons-material/Delete"
 import Checkbox from "@mui/material/Checkbox"
 import IconButton from "@mui/material/IconButton"
-import DeleteIcon from "@mui/icons-material/Delete"
-import TextField from "@mui/material/TextField"
-import { useState, ChangeEvent } from "react"
-import type { DomainTask } from "@/features/todolists/api/tasksApi.types"
-import type { DomainTodolist } from "@/features/todolists/model/todolists-slice"
+import ListItem from "@mui/material/ListItem"
+import type { ChangeEvent } from "react"
+import { getListItemSx } from "./TaskItem.styles"
 
 type Props = {
-    task: DomainTask
-    todolist: DomainTodolist
+  task: DomainTask
+  todolist: DomainTodolist
 }
 
 export const TaskItem = ({ task, todolist }: Props) => {
-    const [updateTask] = useUpdateTaskMutation()
-    const [deleteTask] = useDeleteTaskMutation()
+  const [removeTask] = useRemoveTaskMutation()
+  const [updateTask] = useUpdateTaskMutation()
 
-    const [editTitle, setEditTitle] = useState(task.title)
-    const [isEditing, setIsEditing] = useState(false)
+  const deleteTask = () => {
+    removeTask({ todolistId: todolist.id, taskId: task.id })
+  }
 
-    const onDelete = () => {
-        deleteTask({ todolistId: todolist.id, taskId: task.id })
-    }
+  const changeTaskStatus = (e: ChangeEvent<HTMLInputElement>) => {
+    const status = e.currentTarget.checked ? TaskStatus.Completed : TaskStatus.New
+    const model = createTaskModel(task, { status })
+    updateTask({ taskId: task.id, todolistId: todolist.id, model })
+  }
 
-    const onStatusChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const status = e.currentTarget.checked ? TaskStatus.Completed : TaskStatus.New
-        updateTask({
-            todolistId: todolist.id,
-            taskId: task.id,
-            model: { ...task, status },
-        })
-    }
+  const changeTaskTitle = (title: string) => {
+    const model = createTaskModel(task, { title })
+    updateTask({ taskId: task.id, todolistId: todolist.id, model })
+  }
 
-    const onTitleBlur = () => {
-        setIsEditing(false)
-        if (editTitle !== task.title) {
-            updateTask({
-                todolistId: todolist.id,
-                taskId: task.id,
-                model: { ...task, title: editTitle },
-            })
-        }
-    }
+  const isTaskCompleted = task.status === TaskStatus.Completed
+  const disabled = todolist.entityStatus === "loading"
 
-    return (
-        <div style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}>
-            <Checkbox checked={task.status === TaskStatus.Completed} onChange={onStatusChange} />
-            {isEditing ? (
-                <TextField
-                    value={editTitle}
-                    onChange={(e) => setEditTitle(e.target.value)}
-                    onBlur={onTitleBlur}
-                    size="small"
-                />
-            ) : (
-                <span onDoubleClick={() => setIsEditing(true)} style={{ flex: 1 }}>
-          {task.title}
-        </span>
-            )}
-            <IconButton onClick={onDelete}>
-                <DeleteIcon />
-            </IconButton>
-        </div>
-    )
+  return (
+    <ListItem sx={getListItemSx(isTaskCompleted)}>
+      <div>
+        <Checkbox checked={isTaskCompleted} onChange={changeTaskStatus} disabled={disabled} />
+        <EditableSpan value={task.title} onChange={changeTaskTitle} disabled={disabled} />
+      </div>
+      <IconButton onClick={deleteTask} disabled={disabled}>
+        <DeleteIcon />
+      </IconButton>
+    </ListItem>
+  )
 }
