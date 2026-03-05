@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useCreateTaskMutation } from "@/features/todolists/api/tasksApi"
+import { useAddTaskMutation } from "@/features/todolists/api/tasksApi"
 import TextField from "@mui/material/TextField"
 import Button from "@mui/material/Button"
 
@@ -9,7 +9,7 @@ type Props = {
 
 export const AddItemForm = ({ todolistId }: Props) => {
     const [title, setTitle] = useState("")
-    const [createTask] = useCreateTaskMutation()
+    const [createTask] = useAddTaskMutation()
 
     const onAdd = () => {
         if (title.trim() === "") return
