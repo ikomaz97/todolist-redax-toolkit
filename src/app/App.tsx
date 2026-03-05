@@ -1,63 +1,52 @@
 import "./App.css"
-
-import { useEffect, useState } from "react"
-
+import { selectThemeMode, setIsLoggedInAC } from "@/app/app-slice"
+import { ErrorSnackbar, Header } from "@/common/components"
+import { ResultCode } from "@/common/enums"
+import { useAppDispatch, useAppSelector } from "@/common/hooks"
+import { Routing } from "@/common/routing"
+import { getTheme } from "@/common/theme"
+import { useMeQuery } from "@/features/auth/api/authApi"
+import CircularProgress from "@mui/material/CircularProgress"
 import CssBaseline from "@mui/material/CssBaseline"
 import { ThemeProvider } from "@mui/material/styles"
-import { CircularProgress } from "@mui/material"
-
+import { useEffect, useState } from "react"
 import styles from "./App.module.css"
 
-import { selectThemeMode, setIsLoggedInAC } from "@/app/app-slice"
-import { useAppDispatch, useAppSelector } from "@/common/hooks"
-import { getTheme } from "@/common/theme"
-
-import { Header, ErrorSnackbar } from "@/common/components"
-import { Routing } from "@/common/routing"
-
-import { useMeQuery } from "@/features/auth/api/authApi"
-import { ResultCode } from "@/common/enums"
-
 export const App = () => {
-    const themeMode = useAppSelector(selectThemeMode)
-    const dispatch = useAppDispatch()
+  const themeMode = useAppSelector(selectThemeMode)
 
-    const theme = getTheme(themeMode)
+  const [isInitialized, setIsInitialized] = useState(false)
 
-    // ✅ флаг инициализации приложения
-    const [isInitialized, setIsInitialized] = useState(false)
+  const { data, isLoading } = useMeQuery()
 
-    // ✅ запрос "кто я"
-    const { data, isLoading } = useMeQuery()
+  const dispatch = useAppDispatch()
 
-    // ✅ логика инициализации
-    useEffect(() => {
-        if (isLoading) return
+  const theme = getTheme(themeMode)
 
-        if (data?.resultCode === ResultCode.Success) {
-            dispatch(setIsLoggedInAC({ isLoggedIn: true }))
-        }
-
-        setIsInitialized(true)
-    }, [isLoading, data, dispatch])
-
-    // ✅ пока приложение не готово — показываем loader
-    if (!isInitialized) {
-        return (
-            <div className={styles.circularProgressContainer}>
-                <CircularProgress size={150} thickness={3} />
-            </div>
-        )
+  useEffect(() => {
+    if (isLoading) return
+    if (data?.resultCode === ResultCode.Success) {
+      dispatch(setIsLoggedInAC({ isLoggedIn: true }))
     }
+    setIsInitialized(true)
+  }, [isLoading])
 
+  if (!isInitialized) {
     return (
-        <ThemeProvider theme={theme}>
-            <div className={styles.app}>
-                <CssBaseline />
-                <Header />
-                <Routing />
-                <ErrorSnackbar />
-            </div>
-        </ThemeProvider>
+      <div className={styles.circularProgressContainer}>
+        <CircularProgress size={150} thickness={3} />
+      </div>
     )
+  }
+
+  return (
+    <ThemeProvider theme={theme}>
+      <div className={styles.app}>
+        <CssBaseline />
+        <Header />
+        <Routing />
+        <ErrorSnackbar />
+      </div>
+    </ThemeProvider>
+  )
 }
