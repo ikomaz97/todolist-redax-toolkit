@@ -1,34 +1,32 @@
 import { TaskPriority, TaskStatus } from "@/common/enums"
+import { z } from "zod/v4"
 
-/* 📌 Таска */
-export type DomainTask = {
-    description: string | null
-    deadline: string | null
-    startDate: string | null
+export const domainTaskSchema = z.object({
+  description: z.string().nullable(),
+  deadline: z.string().nullable(),
+  startDate: z.iso.datetime({ local: true }).nullable(),
+  title: z.string(),
+  status: z.enum(TaskStatus),
+  priority: z.enum(TaskPriority),
+  id: z.string(),
+  todoListId: z.string(),
+  order: z.int(),
+  addedDate: z.iso.datetime({ local: true }),
+})
 
-    title: string
-    status: TaskStatus
-    priority: TaskPriority
+export type DomainTask = z.infer<typeof domainTaskSchema>
 
-    id: string
-    todoListId: string
-    order: number
-    addedDate: string
-}
-
-/* 📌 Ответ от сервера */
 export type GetTasksResponse = {
-    error: string | null
-    totalCount: number
-    items: DomainTask[]
+  error: string | null
+  totalCount: number
+  items: DomainTask[]
 }
 
-/* 📌 Модель обновления */
 export type UpdateTaskModel = {
-    title: string
-    description: string | null
-    status: TaskStatus
-    priority: TaskPriority
-    startDate: string | null
-    deadline: string | null
+  description: string | null
+  title: string
+  status: TaskStatus
+  priority: TaskPriority
+  startDate: string | null
+  deadline: string | null
 }
