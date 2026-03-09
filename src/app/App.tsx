@@ -29,7 +29,7 @@ export const App = () => {
       dispatch(setIsLoggedInAC({ isLoggedIn: true }))
     }
     setIsInitialized(true)
-  }, [isLoading])
+  }, [isLoading, data, dispatch])
 
   if (!isInitialized) {
     return (
