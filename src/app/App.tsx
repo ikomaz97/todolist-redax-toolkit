@@ -14,7 +14,7 @@ import styles from "./App.module.css"
 
 export const App = () => {
   const themeMode = useAppSelector(selectThemeMode)
-
+  
   const [isInitialized, setIsInitialized] = useState(false)
 
   const { data, isLoading } = useMeQuery()
@@ -29,7 +29,7 @@ export const App = () => {
       dispatch(setIsLoggedInAC({ isLoggedIn: true }))
     }
     setIsInitialized(true)
-  }, [isLoading, data, dispatch])
+  }, [isLoading])
 
   if (!isInitialized) {
     return (
