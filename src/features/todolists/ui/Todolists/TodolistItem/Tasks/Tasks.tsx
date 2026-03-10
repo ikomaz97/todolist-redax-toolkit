@@ -1,57 +1,38 @@
+import { TaskStatus } from "@/common/enums"
 import { useGetTasksQuery } from "@/features/todolists/api/tasksApi"
-import type { DomainTodolist } from "@/features/todolists/model/todolists-slice"
+import type { DomainTodolist } from "@/features/todolists/lib/types"
 import List from "@mui/material/List"
 import { TaskItem } from "./TaskItem/TaskItem"
-import { TasksSkeleton } from "@/features/todolists/ui/Todolists/TodolistItem/Tasks/TasksSkeleton/TasksSkeleton"
-import { setAppErrorAC } from "@/app/app-slice"
-import { useAppDispatch } from "@/common/hooks" // ← нужно добавить импорт
-import { useEffect } from "react" // ← нужно добавить импорт
+import { TasksSkeleton } from "./TasksSkeleton/TasksSkeleton"
 
 type Props = {
-    todolist: DomainTodolist
+  todolist: DomainTodolist
 }
 
 export const Tasks = ({ todolist }: Props) => {
-    const dispatch = useAppDispatch() // ← нужно объявить dispatch
+  const { id, filter } = todolist
 
-    const { data, isLoading, error } = useGetTasksQuery(todolist.id) // ← isError можно не использовать, достаточно error
+  const { data, isLoading } = useGetTasksQuery(id)
 
-    // Правильная обработка ошибки с type guard
-    useEffect(() => {
-        if (!error) return
+  let filteredTasks = data?.items
+  if (filter === "active") {
+    filteredTasks = filteredTasks?.filter((task) => task.status === TaskStatus.New)
+  }
+  if (filter === "completed") {
+    filteredTasks = filteredTasks?.filter((task) => task.status === TaskStatus.Completed)
+  }
 
-        // Проверяем тип ошибки через type guard
-        if ('status' in error) {
-            // Это FetchBaseQueryError
-            const errMsg = 'error' in error
-                ? error.error // строковая ошибка (например, "FETCH_ERROR")
-                : JSON.stringify(error.data) // сериализуем данные ошибки с сервера
-            dispatch(setAppErrorAC({ error: errMsg }))
-        } else {
-            // Это SerializedError
-            dispatch(setAppErrorAC({ error: error.message || 'Some error occurred' }))
-        }
-    }, [error, dispatch]) // ← добавляем зависимости
+  if (isLoading) {
+    return <TasksSkeleton />
+  }
 
-    // Фильтрация задач (если нужна)
-    let filteredTasks = data?.items
-
-    // Показываем скелетон во время загрузки
-    if (isLoading) {
-        return <TasksSkeleton />
-    }
-
-    return (
-        <>
-            {!filteredTasks || filteredTasks.length === 0 ? (
-                <p>Тасок нет</p>
-            ) : (
-                <List>
-                    {filteredTasks.map((task) => (
-                        <TaskItem key={task.id} task={task} todolist={todolist} />
-                    ))}
-                </List>
-            )}
-        </>
-    )
+  return (
+    <>
+      {filteredTasks?.length === 0 ? (
+        <p>Тасок нет</p>
+      ) : (
+        <List>{filteredTasks?.map((task) => <TaskItem key={task.id} task={task} todolist={todolist} />)}</List>
+      )}
+    </>
+  )
 }
