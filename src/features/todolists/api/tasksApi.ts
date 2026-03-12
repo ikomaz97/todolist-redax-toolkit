@@ -5,12 +5,18 @@ import type { DomainTask, GetTasksResponse, UpdateTaskModel } from "./tasksApi.t
 
 export const tasksApi = baseApi.injectEndpoints({
     endpoints: (build) => ({
-        getTasks: build.query<GetTasksResponse, string>({
-            query: (todolistId) => `todo-lists/${todolistId}/tasks`,
-            providesTags: (res, _err, todolistId) =>
+        getTasks: build.query<GetTasksResponse, { todolistId: string; page: number; count: number }>({
+            query: ({ todolistId, page, count }) => ({
+                url: `todo-lists/${todolistId}/tasks`,
+                params: { page, count },
+            }),
+            providesTags: (res, _err, { todolistId }) =>
                 res
-                    ? [...res.items.map(({ id }) => ({ type: "Task", id }) as const), { type: "Task", id: todolistId }]
-                    : ["Task"],
+                    ? [
+                          ...res.items.map(({ id }) => ({ type: "Task", id }) as const),
+                          { type: "Task", id: `${todolistId}-PARTIAL-LIST` },
+                      ]
+                    : [{ type: "Task", id: `${todolistId}-PARTIAL-LIST` }],
         }),
     addTask: build.mutation<BaseResponse<{ item: DomainTask }>, { todolistId: string; title: string }>({
       query: ({ todolistId, title }) => ({
@@ -18,14 +24,14 @@ export const tasksApi = baseApi.injectEndpoints({
         method: "POST",
         body: { title },
       }),
-        invalidatesTags: res => [{ type: 'Task', id: res ? res.data.item.id : 'LIST' }],
+        invalidatesTags: (_res, _err, { todolistId }) => [{ type: "Task", id: `${todolistId}-PARTIAL-LIST` }],
     }),
     removeTask: build.mutation<BaseResponse, { todolistId: string; taskId: string }>({
       query: ({ todolistId, taskId }) => ({
         url: `todo-lists/${todolistId}/tasks/${taskId}`,
         method: "DELETE",
       }),
-        invalidatesTags: (_res, _err, { taskId }) => [{ type: "Task", id: taskId }],
+        invalidatesTags: (_res, _err, { todolistId }) => [{ type: "Task", id: `${todolistId}-PARTIAL-LIST` }],
     }),
     updateTask: build.mutation<
       BaseResponse<{ item: DomainTask }>,
@@ -36,7 +42,7 @@ export const tasksApi = baseApi.injectEndpoints({
         method: "PUT",
         body: model,
       }),
-      invalidatesTags: ["Task"],
+      invalidatesTags: (_res, _err, { todolistId }) => [{ type: "Task", id: `${todolistId}-PARTIAL-LIST` }],
     }),
   }),
 })
