@@ -32,8 +32,8 @@ export const Tasks = ({ todolist }: Props) => {
   return (
       <Box sx={{
         minHeight: {
-          xs: '150px',  // мобильные
-          sm: '200px',  // планшеты
+          xs: '250px',  // мобильные
+          sm: '250px',  // планшеты
           md: '250px'   // десктопы
         },
         height: 'auto',
