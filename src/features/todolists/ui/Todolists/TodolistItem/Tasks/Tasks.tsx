@@ -1,11 +1,12 @@
 import { TaskStatus } from "@/common/enums"
-import { useGetTasksQuery } from "@/features/todolists/api/tasksApi"
+import { useTasksPagination } from "@/features/todolists/hooks/useTasksPagination"
 import type { DomainTodolist } from "@/features/todolists/lib/types"
+import Box from "@mui/material/Box" // <-- ДОБАВИЛИ Box
 import List from "@mui/material/List"
+import Stack from "@mui/material/Stack"
+import Button from "@mui/material/Button"
 import { TaskItem } from "./TaskItem/TaskItem"
 import { TasksSkeleton } from "./TasksSkeleton/TasksSkeleton"
-import { useState } from "react"
-import { TasksPagination } from "@/features/todolists/ui/Todolists/TodolistItem/Tasks/TasksPagination.tsx"
 
 type Props = {
   todolist: DomainTodolist
@@ -14,19 +15,14 @@ type Props = {
 export const Tasks = ({ todolist }: Props) => {
   const { id, filter } = todolist
 
-  const [page, setPage] = useState(1)
+  const { tasks, page, totalPages, next, prev, isLoading } = useTasksPagination(id)
 
-  const { data, currentData, isLoading, isFetching } = useGetTasksQuery({
-    todolistId: id,
-    params: { page },
-  })
-
-  let filteredTasks = data?.items
+  let filteredTasks = tasks
   if (filter === "active") {
-    filteredTasks = filteredTasks?.filter((task) => task.status === TaskStatus.New)
+    filteredTasks = filteredTasks.filter((task) => task.status === TaskStatus.New)
   }
   if (filter === "completed") {
-    filteredTasks = filteredTasks?.filter((task) => task.status === TaskStatus.Completed)
+    filteredTasks = filteredTasks.filter((task) => task.status === TaskStatus.Completed)
   }
 
   if (isLoading) {
@@ -34,19 +30,37 @@ export const Tasks = ({ todolist }: Props) => {
   }
 
   return (
-    <>
-      {filteredTasks?.length === 0 ? (
-        <p>Тасок нет</p>
-      ) : (
-        <>
-          <List>
-            {filteredTasks?.map((task) => (
-              <TaskItem key={task.id} task={task} todolist={todolist} />
-            ))}
-          </List>
-          <TasksPagination totalCount={data?.totalCount || 0} page={page} setPage={setPage} />
-        </>
-      )}
-    </>
+      <Box sx={{
+        minHeight: {
+          xs: '250px',  // мобильные
+          sm: '250px',  // планшеты
+          md: '250px'   // десктопы
+        },
+        height: 'auto',
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
+        {filteredTasks.length === 0 ? (
+            <p>Тасок нет</p>
+        ) : (
+            <List>
+              {filteredTasks.map((task) => (
+                  <TaskItem key={task.id} task={task} todolist={todolist} />
+              ))}
+            </List>
+        )}
+
+        <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 'auto', pt: 2 }}>
+          <Button onClick={prev} disabled={page === 1} variant="outlined" size="small">
+            ←
+          </Button>
+          <span>
+          {page} / {totalPages}
+        </span>
+          <Button onClick={next} disabled={page === totalPages} variant="outlined" size="small">
+            →
+          </Button>
+        </Stack>
+      </Box>
   )
 }
