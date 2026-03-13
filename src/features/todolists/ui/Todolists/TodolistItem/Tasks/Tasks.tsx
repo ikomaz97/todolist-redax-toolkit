@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useGetTasksQuery } from "@/features/todolists/api/tasksApi";
 import type { DomainTodolist } from "@/features/todolists/lib/types";
 import { TasksPagination } from "@/features/todolists/ui/Todolists/TodolistItem/Tasks/TasksPagination.tsx"
+import { PAGE_SIZE } from "@/common/constants"
 
 type Props = {
   todolist: DomainTodolist;
@@ -18,7 +19,7 @@ export const Tasks = ({ todolist }: Props) => {
 
   const { data, isLoading } = useGetTasksQuery({
     todolistId: id,
-    params: { page },
+    params: { page, count: PAGE_SIZE },
   })
 
   let filteredTasks = data?.items;
