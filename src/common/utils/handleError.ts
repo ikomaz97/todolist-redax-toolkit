@@ -8,7 +8,7 @@ export const handleError = (
   result: QueryReturnValue<unknown, FetchBaseQueryError, FetchBaseQueryMeta>
 ) => {
   let error = "Some error occurred"
-  
+
   if (result.error) {
     switch (result.error.status) {
       case "FETCH_ERROR":
@@ -27,12 +27,8 @@ export const handleError = (
         }
         break
       default:
-        if (typeof result.error.status === "number") {
-          if (result.error.status >= 500 && result.error.status < 600) {
-            error = "Server error occurred. Please try again later."
-          } else {
-            error = JSON.stringify(result.error)
-          }
+        if (result.error.status >= 500 && result.error.status < 600) {
+          error = "Server error occurred. Please try again later."
         } else {
           error = JSON.stringify(result.error)
         }
@@ -40,7 +36,7 @@ export const handleError = (
     }
     api.dispatch(setAppErrorAC({ error }))
   }
-  
+
   if ((result.data as { resultCode: ResultCode }).resultCode === ResultCode.Error) {
     const messages = (result.data as { messages: string[] }).messages
     error = messages.length ? messages[0] : error
