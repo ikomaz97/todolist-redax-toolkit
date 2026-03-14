@@ -16,11 +16,13 @@ export const Tasks = ({ todolist }: Props) => {
   const { id, filter } = todolist
 
   const [page, setPage] = useState(1)
-
   const { data, isLoading } = useGetTasksQuery({
     todolistId: id,
     params: { page, count: PAGE_SIZE },
   })
+
+  // Используем data?.totalCount для проверки
+  const showPagination = (data?.totalCount || 0) > PAGE_SIZE
 
   let filteredTasks = data?.items;
   if (filter === "active") {
@@ -43,7 +45,15 @@ export const Tasks = ({ todolist }: Props) => {
           <List>
             {filteredTasks?.map(task => <TaskItem key={task.id} task={task} todolist={todolist} />)}
           </List>
-          <TasksPagination totalCount={data?.totalCount || 0} page={page} setPage={setPage} />
+
+          {/* Пагинация показывается только если общее количество задач больше PAGE_SIZE */}
+          {showPagination && (
+            <TasksPagination
+              totalCount={data?.totalCount || 0}
+              page={page}
+              setPage={setPage}
+            />
+          )}
         </>
       )}
     </>
