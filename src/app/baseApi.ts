@@ -1,3 +1,4 @@
+// src/app/baseApi.ts
 import { AUTH_TOKEN } from "@/common/constants"
 import { handleError } from "@/common/utils"
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
@@ -8,6 +9,7 @@ export const baseApi = createApi({
   keepUnusedDataFor: 5,
   refetchOnFocus: true,
   refetchOnReconnect: true,
+
   baseQuery: async (args, api, extraOptions) => {
     const result = await fetchBaseQuery({
       baseUrl: import.meta.env.VITE_BASE_URL,
@@ -15,8 +17,15 @@ export const baseApi = createApi({
       headers: {
         "API-KEY": import.meta.env.VITE_API_KEY,
       },
+
       prepareHeaders: (headers) => {
-        headers.set("Authorization", `Bearer ${localStorage.getItem(AUTH_TOKEN)}`)
+        const token = localStorage.getItem(AUTH_TOKEN)
+
+        if (token) {
+          headers.set("Authorization", `Bearer ${token}`)
+        }
+
+        return headers
       },
     })(args, api, extraOptions)
 
@@ -24,5 +33,6 @@ export const baseApi = createApi({
 
     return result
   },
+
   endpoints: () => ({}),
 })
