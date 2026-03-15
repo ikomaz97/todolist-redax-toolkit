@@ -21,7 +21,7 @@ export const Tasks = ({ todolist }: Props) => {
 
   const [page, setPage] = useState(1)
 
-  const { data, isLoading } = useGetTasksQuery({
+  const { data, isLoading, error } = useGetTasksQuery({
     todolistId: id,
     params: { page, count: PAGE_SIZE },
   })
@@ -77,10 +77,13 @@ export const Tasks = ({ todolist }: Props) => {
     let putAfterItemId: string | null = null
 
     if (overIndex === -1) {
+      // Перемещаем в конец
       putAfterItemId = data.items[data.items.length - 1].id
     } else if (overIndex > activeIndex) {
+      // Перемещаем вниз
       putAfterItemId = data.items[overIndex].id
     } else {
+      // Перемещаем вверх
       putAfterItemId = overIndex > 0 ? data.items[overIndex - 1].id : null
     }
 
@@ -91,7 +94,7 @@ export const Tasks = ({ todolist }: Props) => {
     })
 
     try {
-      // Отправляем запрос на сервер - полагаемся на invalidatesTags для обновления
+      // Отправляем запрос на сервер
       const result = await reorderTask({
         todolistId: id,
         taskId: active.id as string,
@@ -121,6 +124,12 @@ export const Tasks = ({ todolist }: Props) => {
   }, [data?.items, filter])
 
   const showPagination = (data?.totalCount || 0) > PAGE_SIZE
+
+  // Обработка ошибки загрузки
+  if (error) {
+    console.warn('Error loading tasks:', error)
+    // Продолжаем рендеринг, просто показываем пустой список
+  }
 
   if (isLoading) {
     return <TasksSkeleton />

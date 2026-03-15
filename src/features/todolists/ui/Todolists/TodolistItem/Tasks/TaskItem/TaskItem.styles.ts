@@ -11,7 +11,6 @@ export const getListItemSx = (isTaskCompleted: boolean): SxProps<Theme> => ({
   backgroundColor: "#fff",
   transition: "background-color 0.2s, opacity 0.2s",
 
-  // Исправлено: используем строковый ключ для псевдо-селектора
   "&:hover": {
     backgroundColor: "#f5f5f5",
   },

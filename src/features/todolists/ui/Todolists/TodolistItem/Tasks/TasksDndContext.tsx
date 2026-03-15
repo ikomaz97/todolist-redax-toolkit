@@ -8,7 +8,7 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
-} from '@dnd-kit/core' // Убран DragOverlay
+} from '@dnd-kit/core'
 import {
   SortableContext,
   sortableKeyboardCoordinates,
