@@ -7,13 +7,11 @@ import { useAppDispatch, useAppSelector } from "@/common/hooks"
 import { Routing } from "@/common/routing"
 import { getTheme } from "@/common/theme"
 import { useMeQuery } from "@/features/auth/api/authApi"
-import { tasksApi } from "@/features/todolists/api/tasksApi"
 import CircularProgress from "@mui/material/CircularProgress"
 import CssBaseline from "@mui/material/CssBaseline"
 import { ThemeProvider } from "@mui/material/styles"
 import { useEffect, useState } from "react"
 import styles from "./App.module.css"
-import { useDispatch } from "react-redux"
 
 export const App = () => {
   const themeMode = useAppSelector(selectThemeMode)
@@ -23,16 +21,8 @@ export const App = () => {
   const { data, isLoading } = useMeQuery()
 
   const dispatch = useAppDispatch()
-  const reduxDispatch = useDispatch()
 
   const theme = getTheme(themeMode)
-
-  // Очищаем кэш RTK Query при монтировании приложения
-  useEffect(() => {
-    // Сбрасываем состояние API (очищает все кэшированные запросы)
-    reduxDispatch(tasksApi.util.resetApiState())
-    console.log('RTK Query cache reset')
-  }, [reduxDispatch])
 
   useEffect(() => {
     if (isLoading) return
@@ -42,7 +32,7 @@ export const App = () => {
     setIsInitialized(true)
   }, [data, isLoading, dispatch])
 
-  if (!isInitialized) {
+  if (!isInitialized || isLoading) {
     return (
       <div className={styles.circularProgressContainer}>
         <CircularProgress size={150} thickness={3} />
