@@ -1,30 +1,34 @@
 // features/todolists/ui/Todolists/Todolists.tsx
-import { containerSx } from "@/common/styles"
 import { useGetTodolistsQuery } from "@/features/todolists/api/todolistsApi"
-import Box from "@mui/material/Box"
+import Grid from "@mui/material/Grid"
 import Paper from "@mui/material/Paper"
 import { TodolistItem } from "./TodolistItem/TodolistItem"
 import { TodolistSkeleton } from "./TodolistSkeleton/TodolistSkeleton"
-import Grid from "@mui/material/Grid";
-import { Alert } from "@mui/material";
+import { Alert } from "@mui/material"
+import { DndContextWrapper } from "@/common/components/Dnd/DndContext"
+import { SortableItem } from "@/common/components/Dnd/SortableItem"
+import { useTodolistDragAndDrop } from "@/common/hooks/useTodolistDragAndDrop.ts"
+ // Добавили импорт
 
 export const Todolists = () => {
   const { data: todolists, isLoading, error } = useGetTodolistsQuery()
+  const { handleDragEnd, todolistIds } = useTodolistDragAndDrop({ todolists: todolists || [] })
 
   if (isLoading) {
     return (
-      <Box sx={containerSx} style={{ gap: "32px" }}>
+      <Grid container spacing={3} sx={{ p: 2 }}>
         {Array(3)
           .fill(null)
           .map((_, id) => (
-            <TodolistSkeleton key={id} />
+            <Grid key={id} {...{ xs: 12, sm: 6, md: 4 }}>
+              <TodolistSkeleton />
+            </Grid>
           ))}
-      </Box>
+      </Grid>
     )
   }
 
   if (error) {
-    console.warn('Error loading todolists:', error)
     return (
       <Alert severity="warning" sx={{ m: 2 }}>
         Ошибка загрузки тудулистов, но вы можете продолжать работу
@@ -34,16 +38,17 @@ export const Todolists = () => {
 
   return (
     <Grid container spacing={3} sx={{ p: 2 }}>
-      {todolists?.map((todolist) => (
-        <Grid
-          key={todolist.id}
-          {...{ xs: 12, sm: 6, md: 4 }}
-        >
-          <Paper sx={{ p: "0 20px 20px 20px", height: '100%' }}>
-            <TodolistItem todolist={todolist} />
-          </Paper>
-        </Grid>
-      ))}
+      <DndContextWrapper items={todolistIds} onDragEnd={handleDragEnd}>
+        {todolists?.map((todolist) => (
+          <SortableItem key={todolist.id} id={todolist.id}>
+            <Grid {...{ xs: 12, sm: 6, md: 4 }}>
+              <Paper sx={{ p: "0 20px 20px 20px", height: "100%" }}>
+                <TodolistItem todolist={todolist} />
+              </Paper>
+            </Grid>
+          </SortableItem>
+        ))}
+      </DndContextWrapper>
     </Grid>
   )
 }
