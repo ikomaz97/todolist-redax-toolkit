@@ -1,5 +1,5 @@
+// features/todolists/ui/Todolists/TodolistItem/FilterButtons/FilterButtons.tsx
 import { useAppDispatch } from "@/common/hooks"
-import { containerSx } from "@/common/styles"
 import { todolistsApi } from "@/features/todolists/api/todolistsApi"
 import type { DomainTodolist, FilterValues } from "@/features/todolists/lib/types"
 import Box from "@mui/material/Box"
@@ -26,21 +26,52 @@ export const FilterButtons = ({ todolist }: Props) => {
   }
 
   return (
-    <Box sx={containerSx}>
-      <Button variant={filter === "all" ? "outlined" : "text"} color={"inherit"} onClick={() => changeFilter("all")}>
+    <Box
+      sx={{
+        display: "flex",
+        gap: 1,
+        width: "100%",
+        mt: 2,
+      }}
+    >
+      <Button
+        variant={filter === "all" ? "contained" : "outlined"}
+        color={"inherit"}
+        onClick={() => changeFilter("all")}
+        sx={{
+          flex: 1,
+          fontSize: "0.75rem",
+          py: 0.5,
+          textTransform: "uppercase",
+        }}
+      >
         All
       </Button>
+
       <Button
-        variant={filter === "active" ? "outlined" : "text"}
+        variant={filter === "active" ? "contained" : "outlined"}
         color={"primary"}
         onClick={() => changeFilter("active")}
+        sx={{
+          flex: 1,
+          fontSize: "0.75rem",
+          py: 0.5,
+          textTransform: "uppercase",
+        }}
       >
         Active
       </Button>
+
       <Button
-        variant={filter === "completed" ? "outlined" : "text"}
+        variant={filter === "completed" ? "contained" : "outlined"}
         color={"secondary"}
         onClick={() => changeFilter("completed")}
+        sx={{
+          flex: 1,
+          fontSize: "0.75rem",
+          py: 0.5,
+          textTransform: "uppercase",
+        }}
       >
         Completed
       </Button>

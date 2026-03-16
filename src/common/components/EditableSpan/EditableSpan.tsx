@@ -1,44 +1,61 @@
+// common/components/EditableSpan/EditableSpan.tsx
+import { useState } from "react"
+import Typography from "@mui/material/Typography"
 import TextField from "@mui/material/TextField"
-import { type ChangeEvent, useState } from "react"
+
 
 type Props = {
   value: string
-  onChange: (title: string) => void
-  disabled?: boolean
+  onChange: (newValue: string) => void
 }
 
-export const EditableSpan = ({ value, onChange, disabled }: Props) => {
+export const EditableSpan = ({ value, onChange }: Props) => {
+  const [editMode, setEditMode] = useState(false)
   const [title, setTitle] = useState(value)
-  const [isEditMode, setIsEditMode] = useState(false)
 
-  const turnOnEditMode = () => {
-    if (disabled) return
-    setIsEditMode(true)
+  const activateEditMode = () => {
+    setEditMode(true)
+    setTitle(value)
   }
 
-  const turnOffEditMode = () => {
-    setIsEditMode(false)
-    onChange(title)
+  const activateViewMode = () => {
+    setEditMode(false)
+    if (title.trim() !== value) {
+      onChange(title.trim())
+    }
   }
 
-  const changeTitle = (event: ChangeEvent<HTMLInputElement>) => {
-    setTitle(event.currentTarget.value)
+  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      activateViewMode()
+    }
   }
 
-  return (
-    <>
-      {isEditMode ? (
-        <TextField
-          variant={"outlined"}
-          value={title}
-          size={"small"}
-          onChange={changeTitle}
-          onBlur={turnOffEditMode}
-          autoFocus
-        />
-      ) : (
-        <span onDoubleClick={turnOnEditMode}>{value}</span>
-      )}
-    </>
+  return editMode ? (
+    <TextField
+      value={title}
+      onChange={(e) => setTitle(e.currentTarget.value)}
+      onBlur={activateViewMode}
+      onKeyDown={onKeyDown}
+      autoFocus
+      size="small"
+      variant="standard"
+      fullWidth
+    />
+  ) : (
+    <Typography
+      variant="body2"
+      onDoubleClick={activateEditMode}
+      sx={{
+        cursor: "pointer",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+        maxWidth: "100%",
+        display: "block",
+      }}
+    >
+      {value}
+    </Typography>
   )
 }

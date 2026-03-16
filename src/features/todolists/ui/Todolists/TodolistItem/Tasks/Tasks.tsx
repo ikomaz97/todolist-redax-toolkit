@@ -8,12 +8,17 @@ import type { DomainTodolist } from "@/features/todolists/lib/types"
 import { TasksPagination } from "./TasksPagination"
 import { PAGE_SIZE } from "@/common/constants"
 import { DndContextWrapper } from "@/common/components/Dnd/DndContext"
-import { useTaskDragAndDrop } from "@/common/hooks/useTaskDragAndDrop.ts"
-
+import { useTaskDragAndDrop } from "@/common/hooks/useTaskDragAndDrop"
+import Box from "@mui/material/Box"
+import Typography from "@mui/material/Typography"
+import Paper from "@mui/material/Paper"
 
 type Props = {
   todolist: DomainTodolist
 }
+
+const TASKS_CONTAINER_HEIGHT = 200
+const EMPTY_CONTAINER_HEIGHT = 200
 
 export const Tasks = ({ todolist }: Props) => {
   const { id, filter } = todolist
@@ -44,20 +49,47 @@ export const Tasks = ({ todolist }: Props) => {
   }
 
   return (
-    <>
+    <Box
+      sx={{
+        minHeight: TASKS_CONTAINER_HEIGHT,
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       {filteredTasks.length === 0 ? (
-        <p>Тасок нет</p>
+        <Paper
+          variant="outlined"
+          sx={{
+            height: EMPTY_CONTAINER_HEIGHT,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            bgcolor: "transparent",
+            border: "1px dashed",
+            borderColor: "divider",
+          }}
+        >
+          <Typography variant="body2" color="text.secondary">
+            Тасок нет
+          </Typography>
+        </Paper>
       ) : (
-        <DndContextWrapper items={taskIds} onDragEnd={handleDragEnd}>
-          <List>
-            {filteredTasks.map((task) => (
-              <TaskItem key={task.id} task={task} todolist={todolist} />
-            ))}
-          </List>
-        </DndContextWrapper>
+        <Paper variant="outlined" sx={{ flex: 1, bgcolor: "transparent" }}>
+          <DndContextWrapper items={taskIds} onDragEnd={handleDragEnd}>
+            <List sx={{ p: 0 }}>
+              {filteredTasks.map((task, index) => (
+                <TaskItem key={task.id} task={task} todolist={todolist} isLast={index === filteredTasks.length - 1} />
+              ))}
+            </List>
+          </DndContextWrapper>
+        </Paper>
       )}
 
-      {showPagination && <TasksPagination totalCount={data?.totalCount || 0} page={page} setPage={setPage} />}
-    </>
+      {showPagination && (
+        <Box sx={{ mt: 1 }}>
+          <TasksPagination totalCount={data?.totalCount || 0} page={page} setPage={setPage} />
+        </Box>
+      )}
+    </Box>
   )
 }
