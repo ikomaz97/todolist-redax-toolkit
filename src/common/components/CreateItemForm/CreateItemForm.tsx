@@ -11,7 +11,6 @@ type Props = {
   onCreateItem: (title: string) => Promise<void> | void
   disabled?: boolean
   placeholder?: string
-  // 👇 Убрали maxLength, так как не ограничиваем ввод
 }
 
 export const CreateItemForm = ({ onCreateItem, disabled = false, placeholder = "Enter a title" }: Props) => {
@@ -51,9 +50,9 @@ export const CreateItemForm = ({ onCreateItem, disabled = false, placeholder = "
     if (error) setError(null)
   }
 
-  const createItemOnEnterHandler = (e: KeyboardEvent<HTMLInputElement>) => {
+  const createItemOnEnterHandler = async (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      createItemHandler()
+      await createItemHandler() // 👈 Добавили await
     }
   }
 
@@ -78,24 +77,29 @@ export const CreateItemForm = ({ onCreateItem, disabled = false, placeholder = "
         disabled={disabled || isAdding}
         placeholder={placeholder}
         fullWidth
-        // 👇 Убрали inputProps и FormHelperTextProps
+        sx={{ flex: 1 }}
       />
 
       <Tooltip title={getTooltipText()} arrow>
         <span>
           <IconButton
-            onClick={createItemHandler}
+            onClick={() => createItemHandler()} // 👈 Оборачиваем в функцию
             disabled={isButtonDisabled}
             color="primary"
             size="large"
             sx={{
+              width: 40,
+              height: 40,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               "&:hover": {
                 transform: "scale(1.1)",
                 transition: "transform 0.2s",
               },
             }}
           >
-            {isAdding ? <CircularProgress size={24} /> : <AddBoxIcon fontSize="large" />}
+            {isAdding ? <CircularProgress size={24} /> : <AddBoxIcon />}
           </IconButton>
         </span>
       </Tooltip>

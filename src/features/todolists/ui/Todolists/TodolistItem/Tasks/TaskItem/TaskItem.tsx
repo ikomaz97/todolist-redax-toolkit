@@ -6,7 +6,6 @@ import type { DomainTask } from "@/features/todolists/api/tasksApi.types"
 import type { DomainTodolist } from "@/features/todolists/lib/types"
 import { createTaskModel } from "@/features/todolists/lib/utils"
 import DeleteIcon from "@mui/icons-material/Delete"
-import DragIndicatorIcon from "@mui/icons-material/DragIndicator"
 import Checkbox from "@mui/material/Checkbox"
 import IconButton from "@mui/material/IconButton"
 import ListItem from "@mui/material/ListItem"
@@ -53,7 +52,6 @@ export const TaskItem = ({ task, todolist, isLast = false }: Props) => {
     } catch (error: any) {
       console.error("Failed to delete task:", error)
 
-      // Проверяем статус ошибки
       if (error?.status === 500) {
         setSnackbarMessage("Server error. Please try again later.")
         setSnackbarSeverity("error")
@@ -104,7 +102,10 @@ export const TaskItem = ({ task, todolist, isLast = false }: Props) => {
             borderColor: "divider",
             px: 1,
             height: 48,
+            cursor: isDragging ? "grabbing" : "grab", // Курор меняется на захват
           }}
+          {...attributes} // Добавляем a11y атрибуты прямо на ListItem
+          {...listeners} // Добавляем обработчики перетаскивания прямо на ListItem
         >
           <Box
             sx={{
@@ -114,20 +115,7 @@ export const TaskItem = ({ task, todolist, isLast = false }: Props) => {
               minWidth: 0,
             }}
           >
-            <Box
-              {...attributes}
-              {...listeners}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                mr: 0.5,
-                cursor: "grab",
-                flexShrink: 0,
-                "&:active": { cursor: "grabbing" },
-              }}
-            >
-              <DragIndicatorIcon fontSize="small" />
-            </Box>
+            {/* Стрелка DragIndicatorIcon ПОЛНОСТЬЮ УДАЛЕНА */}
 
             <Checkbox
               checked={isTaskCompleted}
@@ -136,6 +124,7 @@ export const TaskItem = ({ task, todolist, isLast = false }: Props) => {
               sx={{
                 flexShrink: 0,
                 p: 0.5,
+                mr: 0.5,
               }}
             />
 

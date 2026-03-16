@@ -32,8 +32,8 @@ export const TasksPagination = ({ totalCount, page, setPage }: Props) => {
         flexDirection: "column",
         alignItems: "center",
         gap: 1,
-        mt: 2,
         width: "100%",
+        height: "100%",
       }}
     >
       <Pagination

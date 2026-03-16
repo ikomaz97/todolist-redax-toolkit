@@ -1,4 +1,3 @@
-// features/todolists/ui/Todolists/TodolistItem/Tasks/Tasks.tsx
 import { useGetTasksQuery } from "@/features/todolists/api/tasksApi"
 import List from "@mui/material/List"
 import { TaskItem } from "./TaskItem/TaskItem"
@@ -19,7 +18,7 @@ type Props = {
 }
 
 const TASKS_CONTAINER_HEIGHT = 200
-const EMPTY_CONTAINER_HEIGHT = 200
+const PAGINATION_HEIGHT = 40
 
 export const Tasks = ({ todolist }: Props) => {
   const { id, filter } = todolist
@@ -52,55 +51,67 @@ export const Tasks = ({ todolist }: Props) => {
   return (
     <Box
       sx={{
-        minHeight: TASKS_CONTAINER_HEIGHT,
         display: "flex",
         flexDirection: "column",
       }}
     >
-      {filteredTasks.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          <Paper
-            variant="outlined"
+      {/* Контейнер задач */}
+      <Paper
+        variant="outlined"
+        sx={{
+          height: TASKS_CONTAINER_HEIGHT,
+          bgcolor: "transparent",
+
+          overflowY: "auto",
+          overflowX: "hidden",
+
+          display: "flex",
+          flexDirection: "column",
+
+          /* Firefox */
+          scrollbarWidth: "thin",
+
+          /* Chrome / Edge */
+          "&::-webkit-scrollbar": {
+            width: "6px",
+          },
+          "&::-webkit-scrollbar-track": {
+            background: "transparent",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "rgba(0,0,0,0.2)",
+            borderRadius: "6px",
+          },
+          "&::-webkit-scrollbar-button": {
+            display: "none",
+          },
+        }}
+      >
+        {filteredTasks.length === 0 ? (
+          <Box
             sx={{
-              height: EMPTY_CONTAINER_HEIGHT,
+              flex: 1,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              bgcolor: "transparent",
-              border: "1px dashed",
-              borderColor: "divider",
             }}
           >
             <Typography variant="body2" color="text.secondary">
               No tasks
             </Typography>
-          </Paper>
-        </motion.div>
-      ) : (
-        <Paper
-          variant="outlined"
-          sx={{
-            flex: 1,
-            bgcolor: "transparent",
-            overflow: "hidden",
-          }}
-        >
+          </Box>
+        ) : (
           <DndContextWrapper items={taskIds} onDragEnd={handleDragEnd}>
-            <List sx={{ p: 0 }}>
+            <List sx={{ p: 0, width: "100%" }}>
               <AnimatePresence mode="popLayout">
                 {filteredTasks.map((task, index) => (
                   <motion.div
                     key={task.id}
+                    layout
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 20 }}
                     transition={{ duration: 0.2 }}
-                    layout
                   >
                     <TaskItem task={task} todolist={todolist} isLast={index === filteredTasks.length - 1} />
                   </motion.div>
@@ -108,16 +119,24 @@ export const Tasks = ({ todolist }: Props) => {
               </AnimatePresence>
             </List>
           </DndContextWrapper>
-        </Paper>
-      )}
+        )}
+      </Paper>
 
-      {showPagination && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
-          <Box sx={{ mt: 1 }}>
+      {/* Пагинация */}
+      <Box
+        sx={{
+          height: PAGINATION_HEIGHT,
+          mt: 1,
+        }}
+      >
+        {showPagination ? (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
             <TasksPagination totalCount={data?.totalCount || 0} page={page} setPage={setPage} />
-          </Box>
-        </motion.div>
-      )}
+          </motion.div>
+        ) : (
+          <Box sx={{ height: "100%" }} />
+        )}
+      </Box>
     </Box>
   )
 }
