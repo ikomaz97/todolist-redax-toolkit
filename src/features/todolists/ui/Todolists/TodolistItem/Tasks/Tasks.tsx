@@ -87,12 +87,6 @@ export const Tasks = ({ todolist }: Props) => {
       putAfterItemId = overIndex > 0 ? data.items[overIndex - 1].id : null
     }
 
-    console.log('Sending to API:', {
-      todolistId: id,
-      taskId: active.id,
-      putAfterItemId
-    })
-
     try {
       // Отправляем запрос на сервер
       const result = await reorderTask({
