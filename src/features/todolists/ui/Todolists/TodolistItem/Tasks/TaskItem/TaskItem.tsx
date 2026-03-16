@@ -16,6 +16,9 @@ import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import Box from "@mui/material/Box"
 import { motion } from "framer-motion"
+import Snackbar from "@mui/material/Snackbar"
+import Alert from "@mui/material/Alert"
+import { useState } from "react"
 
 type Props = {
   task: DomainTask
@@ -26,8 +29,14 @@ type Props = {
 export const TaskItem = ({ task, todolist, isLast = false }: Props) => {
   const [removeTask] = useRemoveTaskMutation()
   const [updateTask] = useUpdateTaskMutation()
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [snackbarMessage, setSnackbarMessage] = useState("")
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("error")
 
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id })
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: task.id,
+    disabled: false,
+  })
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -35,91 +44,135 @@ export const TaskItem = ({ task, todolist, isLast = false }: Props) => {
     opacity: isDragging ? 0.5 : 1,
   }
 
-  const deleteTask = () => {
-    removeTask({ todolistId: todolist.id, taskId: task.id })
+  const deleteTask = async () => {
+    try {
+      await removeTask({
+        todolistId: todolist.id,
+        taskId: task.id,
+      }).unwrap()
+    } catch (error: any) {
+      console.error("Failed to delete task:", error)
+
+      // Проверяем статус ошибки
+      if (error?.status === 500) {
+        setSnackbarMessage("Server error. Please try again later.")
+        setSnackbarSeverity("error")
+        setSnackbarOpen(true)
+      } else if (error?.status === 400) {
+        setSnackbarMessage("Task not found or already deleted.")
+        setSnackbarSeverity("error")
+        setSnackbarOpen(true)
+      } else {
+        setSnackbarMessage("Failed to delete task. Please try again.")
+        setSnackbarSeverity("error")
+        setSnackbarOpen(true)
+      }
+    }
   }
 
   const changeTaskStatus = (e: ChangeEvent<HTMLInputElement>) => {
     const status = e.currentTarget.checked ? TaskStatus.Completed : TaskStatus.New
     const model = createTaskModel(task, { status })
-    updateTask({ taskId: task.id, todolistId: todolist.id, model })
+    updateTask({
+      taskId: task.id,
+      todolistId: todolist.id,
+      model,
+    })
   }
 
   const changeTaskTitle = (title: string) => {
     const trimmedTitle = title.trim()
     if (trimmedTitle) {
       const model = createTaskModel(task, { title: trimmedTitle })
-      updateTask({ taskId: task.id, todolistId: todolist.id, model })
+      updateTask({
+        taskId: task.id,
+        todolistId: todolist.id,
+        model,
+      })
     }
   }
 
   const isTaskCompleted = task.status === TaskStatus.Completed
 
   return (
-    <motion.div ref={setNodeRef} style={style} whileHover={{ scale: 1.01 }} transition={{ duration: 0.1 }}>
-      <ListItem
-        sx={{
-          ...getListItemSx(isTaskCompleted),
-          borderBottom: isLast ? "none" : "1px solid",
-          borderColor: "divider",
-          px: 1,
-        }}
-      >
-        <Box
+    <>
+      <motion.div ref={setNodeRef} style={style} whileHover={{ scale: 1.01 }} transition={{ duration: 0.1 }} layout>
+        <ListItem
           sx={{
-            display: "flex",
-            alignItems: "center",
-            flex: 1,
-            minWidth: 0,
+            ...getListItemSx(isTaskCompleted),
+            borderBottom: isLast ? "none" : "1px solid",
+            borderColor: "divider",
+            px: 1,
+            height: 48,
           }}
         >
           <Box
-            {...attributes}
-            {...listeners}
             sx={{
               display: "flex",
               alignItems: "center",
-              mr: 0.5,
-              cursor: "grab",
-              flexShrink: 0,
-              "&:active": { cursor: "grabbing" },
+              flex: 1,
+              minWidth: 0,
             }}
           >
-            <DragIndicatorIcon fontSize="small" />
+            <Box
+              {...attributes}
+              {...listeners}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                mr: 0.5,
+                cursor: "grab",
+                flexShrink: 0,
+                "&:active": { cursor: "grabbing" },
+              }}
+            >
+              <DragIndicatorIcon fontSize="small" />
+            </Box>
+
+            <Checkbox
+              checked={isTaskCompleted}
+              onChange={changeTaskStatus}
+              size="small"
+              sx={{
+                flexShrink: 0,
+                p: 0.5,
+              }}
+            />
+
+            <Box
+              sx={{
+                flex: 1,
+                minWidth: 0,
+                ml: 0.5,
+              }}
+            >
+              <EditableSpan value={task.title} onChange={changeTaskTitle} maxDisplayLength={15} />
+            </Box>
           </Box>
 
-          <Checkbox
-            checked={isTaskCompleted}
-            onChange={changeTaskStatus}
+          <IconButton
+            onClick={deleteTask}
             size="small"
             sx={{
               flexShrink: 0,
-              p: 0.5,
-            }}
-          />
-
-          <Box
-            sx={{
-              flex: 1,
-              minWidth: 0,
               ml: 0.5,
             }}
           >
-            <EditableSpan value={task.title} onChange={changeTaskTitle} maxDisplayLength={15} />
-          </Box>
-        </Box>
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </ListItem>
+      </motion.div>
 
-        <IconButton
-          onClick={deleteTask}
-          size="small"
-          sx={{
-            flexShrink: 0,
-            ml: 0.5,
-          }}
-        >
-          <DeleteIcon fontSize="small" />
-        </IconButton>
-      </ListItem>
-    </motion.div>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity} sx={{ width: "100%" }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+    </>
   )
 }

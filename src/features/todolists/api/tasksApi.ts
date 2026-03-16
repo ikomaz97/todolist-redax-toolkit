@@ -51,7 +51,7 @@ export const tasksApi = baseApi.injectEndpoints({
         body: { title },
       }),
 
-      async onQueryStarted({ todolistId, title, currentPage = 1 }, { dispatch, queryFulfilled }) {
+      async onQueryStarted({ todolistId, title, currentPage = 1 }, { dispatch, queryFulfilled, getState }) {
         const tempId = `temp-${Date.now()}`
         const tempTask: DomainTask = {
           id: tempId,
@@ -66,32 +66,67 @@ export const tasksApi = baseApi.injectEndpoints({
           addedDate: new Date().toISOString(),
         }
 
-        // Оптимистичное обновление для указанной страницы
+        // Получаем текущее состояние кэша для проверки лимита
+        const state = getState() as any
+        const queryArgs = { todolistId, params: { page: currentPage, count: PAGE_SIZE } }
+        const cachedData = tasksApi.endpoints.getTasks.select(queryArgs)(state)
+
+        // Проверяем, можно ли добавить задачу на текущую страницу
+        const currentTasksCount = cachedData?.data?.items.length || 0
+        const isPageFull = currentTasksCount >= PAGE_SIZE
+
+        // Определяем целевую страницу
+        const targetPage = isPageFull ? currentPage + 1 : currentPage
+        const targetArgs = {
+          todolistId,
+          params: { page: targetPage, count: PAGE_SIZE },
+        }
+
+        // Получаем данные для целевой страницы
+        const targetCachedData = tasksApi.endpoints.getTasks.select(targetArgs)(state)
+        const targetTasksCount = targetCachedData?.data?.items.length || 0
+        const isTargetPageFull = targetTasksCount >= PAGE_SIZE
+
+        // Если целевая страница тоже полная, не добавляем задачу оптимистично
+        if (isTargetPageFull && targetPage > currentPage) {
+          // Просто увеличиваем общее количество задач
+          dispatch(
+            tasksApi.util.updateQueryData(
+              "getTasks",
+              { todolistId, params: { page: 1, count: PAGE_SIZE } },
+              (draft: GetTasksResponse) => {
+                draft.totalCount += 1
+              },
+            ),
+          )
+          return
+        }
+
+        // Оптимистичное обновление для целевой страницы
         const patchResult = dispatch(
-          tasksApi.util.updateQueryData(
-            "getTasks",
-            { todolistId, params: { page: currentPage, count: PAGE_SIZE } },
-            (draft) => {
+          tasksApi.util.updateQueryData("getTasks", targetArgs, (draft: GetTasksResponse) => {
+            // Добавляем задачу только если есть место
+            if (draft.items.length < PAGE_SIZE) {
               draft.items.unshift(tempTask)
               draft.totalCount += 1
-            },
-          ),
+            } else {
+              // Если нет места, просто увеличиваем счетчик
+              draft.totalCount += 1
+            }
+          }),
         )
 
         try {
           const { data } = await queryFulfilled
           if (data.data?.item) {
+            // Заменяем временную задачу на реальную
             dispatch(
-              tasksApi.util.updateQueryData(
-                "getTasks",
-                { todolistId, params: { page: currentPage, count: PAGE_SIZE } },
-                (draft) => {
-                  const index = draft.items.findIndex((t) => t.id === tempId)
-                  if (index !== -1) {
-                    draft.items[index] = data.data!.item
-                  }
-                },
-              ),
+              tasksApi.util.updateQueryData("getTasks", targetArgs, (draft: GetTasksResponse) => {
+                const index = draft.items.findIndex((t: DomainTask) => t.id === tempId)
+                if (index !== -1) {
+                  draft.items[index] = data.data!.item
+                }
+              }),
             )
           }
         } catch (error) {
@@ -109,11 +144,47 @@ export const tasksApi = baseApi.injectEndpoints({
         method: "DELETE",
       }),
 
-      async onQueryStarted(_, { queryFulfilled }) {
+      async onQueryStarted({ todolistId, taskId }, { dispatch, queryFulfilled, getState }) {
+        // Оптимистичное удаление
+        const state = getState() as any
+
+        // Находим страницу, на которой находится задача
+        let targetPage = 1
+        let taskFound = false
+
+        // Проверяем первые несколько страниц (до 5)
+        for (let page = 1; page <= 5; page++) {
+          const queryArgs = { todolistId, params: { page, count: PAGE_SIZE } }
+          const cachedData = tasksApi.endpoints.getTasks.select(queryArgs)(state)
+
+          if (cachedData?.data?.items.some((t: DomainTask) => t.id === taskId)) {
+            targetPage = page
+            taskFound = true
+            break
+          }
+        }
+
+        if (!taskFound) return
+
+        const patchResult = dispatch(
+          tasksApi.util.updateQueryData(
+            "getTasks",
+            { todolistId, params: { page: targetPage, count: PAGE_SIZE } },
+            (draft: GetTasksResponse) => {
+              const index = draft.items.findIndex((t: DomainTask) => t.id === taskId)
+              if (index !== -1) {
+                draft.items.splice(index, 1)
+                draft.totalCount -= 1
+              }
+            },
+          ),
+        )
+
         try {
           await queryFulfilled
         } catch (error) {
-          console.error("Remove task failed", error)
+          console.error("Remove task failed, rolling back", error)
+          patchResult.undo()
         }
       },
 
@@ -130,14 +201,37 @@ export const tasksApi = baseApi.injectEndpoints({
         body: model,
       }),
 
-      async onQueryStarted({ todolistId, taskId, model }, { dispatch, queryFulfilled }) {
+      async onQueryStarted({ todolistId, taskId, model }, { dispatch, queryFulfilled, getState }) {
+        const state = getState() as any
+
+        // Находим страницу, на которой находится задача
+        let targetPage = 1
+        let taskFound = false
+
+        for (let page = 1; page <= 5; page++) {
+          const queryArgs = { todolistId, params: { page, count: PAGE_SIZE } }
+          const cachedData = tasksApi.endpoints.getTasks.select(queryArgs)(state)
+
+          if (cachedData?.data?.items.some((t: DomainTask) => t.id === taskId)) {
+            targetPage = page
+            taskFound = true
+            break
+          }
+        }
+
+        if (!taskFound) return
+
         const patchResult = dispatch(
-          tasksApi.util.updateQueryData("getTasks", { todolistId, params: { page: 1, count: PAGE_SIZE } }, (draft) => {
-            const task = draft.items.find((t) => t.id === taskId)
-            if (task) {
-              Object.assign(task, model)
-            }
-          }),
+          tasksApi.util.updateQueryData(
+            "getTasks",
+            { todolistId, params: { page: targetPage, count: PAGE_SIZE } },
+            (draft: GetTasksResponse) => {
+              const task = draft.items.find((t: DomainTask) => t.id === taskId)
+              if (task) {
+                Object.assign(task, model)
+              }
+            },
+          ),
         )
 
         try {
@@ -158,25 +252,48 @@ export const tasksApi = baseApi.injectEndpoints({
         body: { putAfterItemId },
       }),
 
-      async onQueryStarted({ todolistId, taskId, putAfterItemId }, { dispatch, queryFulfilled }) {
+      async onQueryStarted({ todolistId, taskId, putAfterItemId }, { dispatch, queryFulfilled, getState }) {
+        const state = getState() as any
+
+        // Находим страницу, на которой находится задача
+        let targetPage = 1
+        let taskFound = false
+
+        for (let page = 1; page <= 5; page++) {
+          const queryArgs = { todolistId, params: { page, count: PAGE_SIZE } }
+          const cachedData = tasksApi.endpoints.getTasks.select(queryArgs)(state)
+
+          if (cachedData?.data?.items.some((t: DomainTask) => t.id === taskId)) {
+            targetPage = page
+            taskFound = true
+            break
+          }
+        }
+
+        if (!taskFound) return
+
         const patchResult = dispatch(
-          tasksApi.util.updateQueryData("getTasks", { todolistId, params: { page: 1, count: PAGE_SIZE } }, (draft) => {
-            const activeIndex = draft.items.findIndex((t) => t.id === taskId)
-            if (activeIndex === -1) return
+          tasksApi.util.updateQueryData(
+            "getTasks",
+            { todolistId, params: { page: targetPage, count: PAGE_SIZE } },
+            (draft: GetTasksResponse) => {
+              const activeIndex = draft.items.findIndex((t: DomainTask) => t.id === taskId)
+              if (activeIndex === -1) return
 
-            const [movedTask] = draft.items.splice(activeIndex, 1)
+              const [movedTask] = draft.items.splice(activeIndex, 1)
 
-            if (putAfterItemId === null) {
-              draft.items.unshift(movedTask)
-            } else {
-              const targetIndex = draft.items.findIndex((t) => t.id === putAfterItemId)
-              if (targetIndex !== -1) {
-                draft.items.splice(targetIndex + 1, 0, movedTask)
+              if (putAfterItemId === null) {
+                draft.items.unshift(movedTask)
               } else {
-                draft.items.splice(activeIndex, 0, movedTask)
+                const targetIndex = draft.items.findIndex((t: DomainTask) => t.id === putAfterItemId)
+                if (targetIndex !== -1) {
+                  draft.items.splice(targetIndex + 1, 0, movedTask)
+                } else {
+                  draft.items.splice(activeIndex, 0, movedTask)
+                }
               }
-            }
-          }),
+            },
+          ),
         )
 
         try {
