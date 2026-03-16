@@ -1,13 +1,14 @@
-// features/todolists/hooks/useTaskDragAndDrop.ts
+// features/todolists/hooks/useTaskDragAndDrop.ts (обновленная версия)
 import { PAGE_SIZE } from "@/common/constants"
-import { useReorderTaskMutation } from "@/features/todolists/api/tasksApi"
+import {  useReorderTaskMutation } from "@/features/todolists/api/tasksApi"
+import type { DomainTask } from "@/features/todolists/api/tasksApi.types"
 import { DragEndEvent } from "@dnd-kit/core"
-import {  useEffect, useMemo } from "react"
+import { useEffect, useMemo } from "react"
 import { TaskStatus } from "@/common/enums"
 
 type UseTaskDragAndDropProps = {
   todolistId: string
-  items: any[] // Замените на правильный тип DomainTask[]
+  items: DomainTask[]
   totalCount: number
   page: number
   setPage: (page: number) => void
@@ -56,14 +57,13 @@ export const useTaskDragAndDrop = ({
 
     if (!items || active.id === over?.id) return
 
-    // Находим индексы
     const activeIndex = items.findIndex((t) => t.id === active.id)
     const overIndex = over ? items.findIndex((t) => t.id === over.id) : -1
 
     if (activeIndex === -1) return
 
     // Определяем putAfterItemId для API
-    let putAfterItemId: string | null = null
+    let putAfterItemId: string | null
 
     if (overIndex === -1) {
       // Перемещаем в конец
@@ -77,6 +77,7 @@ export const useTaskDragAndDrop = ({
     }
 
     try {
+      // Оптимистичное обновление уже обрабатывается в onQueryStarted в API
       await reorderTask({
         todolistId,
         taskId: active.id as string,
@@ -84,6 +85,7 @@ export const useTaskDragAndDrop = ({
       }).unwrap()
     } catch (error) {
       console.error("Reorder failed:", error)
+      // Ошибка уже обработана в onQueryStarted (откат)
     }
   }
 

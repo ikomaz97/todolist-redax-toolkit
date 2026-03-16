@@ -20,7 +20,7 @@ export const tasksApi = baseApi.injectEndpoints({
           console.warn(`Server error for todolist, but we'll ignore it`)
           return {
             error: "Todolist might not exist",
-            status: response.status
+            status: response.status,
           }
         }
         return response
@@ -30,7 +30,7 @@ export const tasksApi = baseApi.injectEndpoints({
       transformResponse: (response: GetTasksResponse) => {
         return {
           ...response,
-          items: [...response.items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+          items: [...response.items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
         }
       },
 
@@ -40,7 +40,7 @@ export const tasksApi = baseApi.injectEndpoints({
         if (result) {
           const taskTags = result.items.map(({ id }) => ({
             type: "Task" as const,
-            id
+            id,
           }))
           return [...tags, ...taskTags]
         }
@@ -55,9 +55,7 @@ export const tasksApi = baseApi.injectEndpoints({
         method: "POST",
         body: { title },
       }),
-      invalidatesTags: (_res, _err, { todolistId }) => [
-        { type: "Task", id: todolistId }
-      ],
+      invalidatesTags: (_res, _err, { todolistId }) => [{ type: "Task", id: todolistId }],
     }),
 
     removeTask: build.mutation<BaseResponse, { todolistId: string; taskId: string }>({
@@ -65,9 +63,25 @@ export const tasksApi = baseApi.injectEndpoints({
         url: `todo-lists/${todolistId}/tasks/${taskId}`,
         method: "DELETE",
       }),
-      invalidatesTags: (_res, _err, { todolistId }) => [
-        { type: "Task", id: todolistId }
-      ],
+
+      async onQueryStarted({ todolistId, taskId }, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          tasksApi.util.updateQueryData("getTasks", { todolistId, params: { page: 1, count: PAGE_SIZE } }, (draft) => {
+            const index = draft.items.findIndex((t) => t.id === taskId)
+            if (index !== -1) {
+              draft.items.splice(index, 1)
+            }
+          }),
+        )
+
+        try {
+          await queryFulfilled
+        } catch {
+          patchResult.undo()
+        }
+      },
+
+      invalidatesTags: (_res, _err, { todolistId }) => [{ type: "Task", id: todolistId }],
     }),
 
     updateTask: build.mutation<
@@ -76,18 +90,31 @@ export const tasksApi = baseApi.injectEndpoints({
     >({
       query: ({ todolistId, taskId, model }) => ({
         url: `todo-lists/${todolistId}/tasks/${taskId}`,
-        method: 'PUT',
+        method: "PUT",
         body: model,
       }),
-      invalidatesTags: (_res, _err, { taskId }) => [
-        { type: "Task", id: taskId }
-      ],
+
+      async onQueryStarted({ todolistId, taskId, model }, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          tasksApi.util.updateQueryData("getTasks", { todolistId, params: { page: 1, count: PAGE_SIZE } }, (draft) => {
+            const task = draft.items.find((t) => t.id === taskId)
+            if (task) {
+              Object.assign(task, model)
+            }
+          }),
+        )
+
+        try {
+          await queryFulfilled
+        } catch {
+          patchResult.undo()
+        }
+      },
+
+      invalidatesTags: (_res, _err, { taskId }) => [{ type: "Task", id: taskId }],
     }),
 
-    reorderTask: build.mutation<
-      BaseResponse,
-      { todolistId: string; taskId: string; putAfterItemId: string | null }
-    >({
+    reorderTask: build.mutation<BaseResponse, { todolistId: string; taskId: string; putAfterItemId: string | null }>({
       query: ({ todolistId, taskId, putAfterItemId }) => {
         return {
           url: `todo-lists/${todolistId}/tasks/${taskId}/reorder`,
@@ -95,9 +122,50 @@ export const tasksApi = baseApi.injectEndpoints({
           body: { putAfterItemId },
         }
       },
-      invalidatesTags: (_res, _err, { todolistId }) => [
-        { type: "Task", id: todolistId }
-      ],
+
+      // Оптимистичное обновление - убрали неиспользуемый getState
+      async onQueryStarted(
+        { todolistId, taskId, putAfterItemId },
+        { dispatch, queryFulfilled }, // Убрали getState
+      ) {
+        // Явно указываем тип для patchResult
+        const patchResult = dispatch(
+          tasksApi.util.updateQueryData("getTasks", { todolistId, params: { page: 1, count: PAGE_SIZE } }, (draft) => {
+            // Находим индекс перемещаемой задачи
+            const activeIndex = draft.items.findIndex((t) => t.id === taskId)
+            if (activeIndex === -1) return
+
+            // Удаляем задачу из текущей позиции
+            const [movedTask] = draft.items.splice(activeIndex, 1)
+
+            // Находим новую позицию
+            if (putAfterItemId === null) {
+              // Вставляем в начало
+              draft.items.unshift(movedTask)
+            } else {
+              // Находим индекс элемента, после которого нужно вставить
+              const targetIndex = draft.items.findIndex((t) => t.id === putAfterItemId)
+              if (targetIndex !== -1) {
+                // Вставляем после targetIndex
+                draft.items.splice(targetIndex + 1, 0, movedTask)
+              } else {
+                // Если целевой элемент не найден, возвращаем на место
+                draft.items.splice(activeIndex, 0, movedTask)
+              }
+            }
+          }),
+        )
+
+        try {
+          await queryFulfilled
+        } catch (error) {
+          console.error("Reorder task failed, rolling back", error)
+          // Откатываем изменения при ошибке
+          patchResult.undo()
+        }
+      },
+
+      invalidatesTags: (_res, _err, { todolistId }) => [{ type: "Task", id: todolistId }],
     }),
   }),
 })

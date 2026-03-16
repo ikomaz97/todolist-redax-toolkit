@@ -51,24 +51,34 @@ export const todolistsApi = baseApi.injectEndpoints({
         method: "PUT",
         body: { title },
       }),
+      async onQueryStarted({ id, title }, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          todolistsApi.util.updateQueryData("getTodolists", undefined, (state) => {
+            const todolist = state.find((t) => t.id === id)
+            if (todolist) {
+              todolist.title = title
+            }
+          }),
+        )
+
+        try {
+          await queryFulfilled
+        } catch {
+          patchResult.undo()
+        }
+      },
       invalidatesTags: ["Todolist"],
     }),
 
-    // НОВОЕ: Добавляем мутацию для переупорядочивания тудулистов
     reorderTodolist: build.mutation<BaseResponse, { todolistId: string; putAfterItemId: string | null }>({
       query: ({ todolistId, putAfterItemId }) => ({
         url: `todo-lists/${todolistId}/reorder`,
         method: "PUT",
         body: { putAfterItemId },
       }),
-      // Оптимистичное обновление (опционально)
-      async onQueryStarted({ todolistId, putAfterItemId }, { dispatch, queryFulfilled, getState }) {
-        // Сохраняем текущее состояние для возможного отката
-        const state = getState()
-        const todolists = (todolistsApi.endpoints.getTodolists.select()(state) as any).data
 
-        if (!todolists) return
-
+      // Убрали getState из параметров, так как он не используется
+      async onQueryStarted({ todolistId, putAfterItemId }, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
           todolistsApi.util.updateQueryData("getTodolists", undefined, (draft) => {
             // Находим индекс перемещаемого тудулиста
@@ -98,10 +108,12 @@ export const todolistsApi = baseApi.injectEndpoints({
 
         try {
           await queryFulfilled
-        } catch {
+        } catch (error) {
+          console.error("Reorder todolist failed, rolling back", error)
           patchResult.undo()
         }
       },
+
       invalidatesTags: ["Todolist"],
     }),
   }),
@@ -112,5 +124,5 @@ export const {
   useAddTodolistMutation,
   useRemoveTodolistMutation,
   useUpdateTodolistTitleMutation,
-  useReorderTodolistMutation, // Экспортируем новый хук
+  useReorderTodolistMutation,
 } = todolistsApi
