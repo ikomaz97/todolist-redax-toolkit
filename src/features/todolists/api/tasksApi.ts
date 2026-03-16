@@ -7,14 +7,11 @@ import { PAGE_SIZE } from "@/common/constants"
 export const tasksApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     getTasks: build.query<GetTasksResponse, { todolistId: string; params: { count: number; page: number } }>({
-      query: ({ todolistId, params }) => {
-        return {
-          url: `todo-lists/${todolistId}/tasks`,
-          params: { ...params, count: PAGE_SIZE },
-        }
-      },
+      query: ({ todolistId, params }) => ({
+        url: `todo-lists/${todolistId}/tasks`,
+        params: { ...params, count: PAGE_SIZE },
+      }),
 
-      // Обрабатываем ошибки
       transformErrorResponse: (response) => {
         if (response.status === 500) {
           console.warn(`Server error for todolist, but we'll ignore it`)
@@ -26,17 +23,13 @@ export const tasksApi = baseApi.injectEndpoints({
         return response
       },
 
-      // Сортируем задачи по полю order
-      transformResponse: (response: GetTasksResponse) => {
-        return {
-          ...response,
-          items: [...response.items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
-        }
-      },
+      transformResponse: (response: GetTasksResponse) => ({
+        ...response,
+        items: [...response.items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
+      }),
 
       providesTags: (result, _err, { todolistId }) => {
         const tags = [{ type: "Task" as const, id: todolistId }]
-
         if (result) {
           const taskTags = result.items.map(({ id }) => ({
             type: "Task" as const,
@@ -44,17 +37,69 @@ export const tasksApi = baseApi.injectEndpoints({
           }))
           return [...tags, ...taskTags]
         }
-
         return tags
       },
     }),
 
-    addTask: build.mutation<BaseResponse<{ item: DomainTask }>, { todolistId: string; title: string }>({
+    addTask: build.mutation<
+      BaseResponse<{ item: DomainTask }>,
+      { todolistId: string; title: string; currentPage?: number }
+    >({
       query: ({ todolistId, title }) => ({
         url: `todo-lists/${todolistId}/tasks`,
         method: "POST",
         body: { title },
       }),
+
+      async onQueryStarted({ todolistId, title, currentPage = 1 }, { dispatch, queryFulfilled }) {
+        const tempId = `temp-${Date.now()}`
+        const tempTask: DomainTask = {
+          id: tempId,
+          title,
+          description: null,
+          status: 0,
+          priority: 0,
+          startDate: null,
+          deadline: null,
+          todoListId: todolistId,
+          order: 0,
+          addedDate: new Date().toISOString(),
+        }
+
+        // Оптимистичное обновление для указанной страницы
+        const patchResult = dispatch(
+          tasksApi.util.updateQueryData(
+            "getTasks",
+            { todolistId, params: { page: currentPage, count: PAGE_SIZE } },
+            (draft) => {
+              draft.items.unshift(tempTask)
+              draft.totalCount += 1
+            },
+          ),
+        )
+
+        try {
+          const { data } = await queryFulfilled
+          if (data.data?.item) {
+            dispatch(
+              tasksApi.util.updateQueryData(
+                "getTasks",
+                { todolistId, params: { page: currentPage, count: PAGE_SIZE } },
+                (draft) => {
+                  const index = draft.items.findIndex((t) => t.id === tempId)
+                  if (index !== -1) {
+                    draft.items[index] = data.data!.item
+                  }
+                },
+              ),
+            )
+          }
+        } catch (error) {
+          console.error("Add task failed, rolling back", error)
+          patchResult.undo()
+        }
+      },
+
       invalidatesTags: (_res, _err, { todolistId }) => [{ type: "Task", id: todolistId }],
     }),
 
@@ -64,20 +109,11 @@ export const tasksApi = baseApi.injectEndpoints({
         method: "DELETE",
       }),
 
-      async onQueryStarted({ todolistId, taskId }, { dispatch, queryFulfilled }) {
-        const patchResult = dispatch(
-          tasksApi.util.updateQueryData("getTasks", { todolistId, params: { page: 1, count: PAGE_SIZE } }, (draft) => {
-            const index = draft.items.findIndex((t) => t.id === taskId)
-            if (index !== -1) {
-              draft.items.splice(index, 1)
-            }
-          }),
-        )
-
+      async onQueryStarted(_, { queryFulfilled }) {
         try {
           await queryFulfilled
-        } catch {
-          patchResult.undo()
+        } catch (error) {
+          console.error("Remove task failed", error)
         }
       },
 
@@ -106,7 +142,8 @@ export const tasksApi = baseApi.injectEndpoints({
 
         try {
           await queryFulfilled
-        } catch {
+        } catch (error) {
+          console.error("Update task failed, rolling back", error)
           patchResult.undo()
         }
       },
@@ -115,41 +152,27 @@ export const tasksApi = baseApi.injectEndpoints({
     }),
 
     reorderTask: build.mutation<BaseResponse, { todolistId: string; taskId: string; putAfterItemId: string | null }>({
-      query: ({ todolistId, taskId, putAfterItemId }) => {
-        return {
-          url: `todo-lists/${todolistId}/tasks/${taskId}/reorder`,
-          method: "PUT",
-          body: { putAfterItemId },
-        }
-      },
+      query: ({ todolistId, taskId, putAfterItemId }) => ({
+        url: `todo-lists/${todolistId}/tasks/${taskId}/reorder`,
+        method: "PUT",
+        body: { putAfterItemId },
+      }),
 
-      // Оптимистичное обновление - убрали неиспользуемый getState
-      async onQueryStarted(
-        { todolistId, taskId, putAfterItemId },
-        { dispatch, queryFulfilled }, // Убрали getState
-      ) {
-        // Явно указываем тип для patchResult
+      async onQueryStarted({ todolistId, taskId, putAfterItemId }, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
           tasksApi.util.updateQueryData("getTasks", { todolistId, params: { page: 1, count: PAGE_SIZE } }, (draft) => {
-            // Находим индекс перемещаемой задачи
             const activeIndex = draft.items.findIndex((t) => t.id === taskId)
             if (activeIndex === -1) return
 
-            // Удаляем задачу из текущей позиции
             const [movedTask] = draft.items.splice(activeIndex, 1)
 
-            // Находим новую позицию
             if (putAfterItemId === null) {
-              // Вставляем в начало
               draft.items.unshift(movedTask)
             } else {
-              // Находим индекс элемента, после которого нужно вставить
               const targetIndex = draft.items.findIndex((t) => t.id === putAfterItemId)
               if (targetIndex !== -1) {
-                // Вставляем после targetIndex
                 draft.items.splice(targetIndex + 1, 0, movedTask)
               } else {
-                // Если целевой элемент не найден, возвращаем на место
                 draft.items.splice(activeIndex, 0, movedTask)
               }
             }
@@ -160,7 +183,6 @@ export const tasksApi = baseApi.injectEndpoints({
           await queryFulfilled
         } catch (error) {
           console.error("Reorder task failed, rolling back", error)
-          // Откатываем изменения при ошибке
           patchResult.undo()
         }
       },

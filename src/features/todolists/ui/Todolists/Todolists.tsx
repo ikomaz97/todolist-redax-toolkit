@@ -8,7 +8,7 @@ import { Alert } from "@mui/material"
 import { DndContextWrapper } from "@/common/components/Dnd/DndContext"
 import { SortableItem } from "@/common/components/Dnd/SortableItem"
 import { useTodolistDragAndDrop } from "@/common/hooks/useTodolistDragAndDrop"
-import Box from "@mui/material/Box"
+import { motion, AnimatePresence } from "framer-motion"
 
 export const Todolists = () => {
   const { data: todolists, isLoading, error } = useGetTodolistsQuery()
@@ -20,7 +20,7 @@ export const Todolists = () => {
         {Array(3)
           .fill(null)
           .map((_, id) => (
-            <Grid key={id} size={{ xs: 12, sm: 12, md: 6, lg: 4 }}>
+            <Grid key={id} size={{ xs: 12, sm: 12, md: 8, lg: 6 }}>
               <TodolistSkeleton />
             </Grid>
           ))}
@@ -37,39 +37,37 @@ export const Todolists = () => {
   }
 
   return (
-    <Grid container spacing={3} sx={{ p: 2 }}>
+    <Grid container spacing={3} sx={{ p: 3 }}>
       <DndContextWrapper items={todolistIds} onDragEnd={handleDragEnd}>
-        {todolists?.map((todolist) => (
-          <SortableItem key={todolist.id} id={todolist.id}>
-            <Grid
-              size={{
-                xs: 12, // телефоны: весь экран
-                sm: 12, // планшеты: весь экран
-                md: 10, // средние: 66% экрана (2/3)
-                lg: 16, // большие: 50% экрана
-                xl: 12, // очень большие: 33% экрана
-              }}
-            >
-              <Paper
-                elevation={2}
-                sx={{
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  overflow: "hidden",
-                  transition: "box-shadow 0.2s",
-                  "&:hover": {
-                    boxShadow: 4,
-                  },
-                }}
-              >
-                <Box sx={{ p: 2, pb: 1 }}>
+        <AnimatePresence>
+          {todolists?.map((todolist) => (
+            <SortableItem key={todolist.id} id={todolist.id}>
+              <Grid size={{ xs: 12, sm: 12, md: 7, lg: 9 }}>
+                <Paper
+                  component={motion.div}
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{
+                    duration: 0.2,
+                    layout: { duration: 0.3 },
+                  }}
+                  sx={{
+                    p: "0 20px 20px 20px",
+                    height: "100%",
+                    boxShadow: 2,
+                    "&:hover": {
+                      boxShadow: 4,
+                    },
+                  }}
+                >
                   <TodolistItem todolist={todolist} />
-                </Box>
-              </Paper>
-            </Grid>
-          </SortableItem>
-        ))}
+                </Paper>
+              </Grid>
+            </SortableItem>
+          ))}
+        </AnimatePresence>
       </DndContextWrapper>
     </Grid>
   )

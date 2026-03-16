@@ -15,6 +15,7 @@ import { getListItemSx } from "./TaskItem.styles"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import Box from "@mui/material/Box"
+import { motion } from "framer-motion"
 
 type Props = {
   task: DomainTask
@@ -45,14 +46,17 @@ export const TaskItem = ({ task, todolist, isLast = false }: Props) => {
   }
 
   const changeTaskTitle = (title: string) => {
-    const model = createTaskModel(task, { title })
-    updateTask({ taskId: task.id, todolistId: todolist.id, model })
+    const trimmedTitle = title.trim()
+    if (trimmedTitle) {
+      const model = createTaskModel(task, { title: trimmedTitle })
+      updateTask({ taskId: task.id, todolistId: todolist.id, model })
+    }
   }
 
   const isTaskCompleted = task.status === TaskStatus.Completed
 
   return (
-    <div ref={setNodeRef} style={style}>
+    <motion.div ref={setNodeRef} style={style} whileHover={{ scale: 1.01 }} transition={{ duration: 0.1 }}>
       <ListItem
         sx={{
           ...getListItemSx(isTaskCompleted),
@@ -66,7 +70,7 @@ export const TaskItem = ({ task, todolist, isLast = false }: Props) => {
             display: "flex",
             alignItems: "center",
             flex: 1,
-            minWidth: 0, // Важно для ограничения текста
+            minWidth: 0,
           }}
         >
           <Box
@@ -97,11 +101,11 @@ export const TaskItem = ({ task, todolist, isLast = false }: Props) => {
           <Box
             sx={{
               flex: 1,
-              minWidth: 0, // Важно для ограничения текста
+              minWidth: 0,
               ml: 0.5,
             }}
           >
-            <EditableSpan value={task.title} onChange={changeTaskTitle} />
+            <EditableSpan value={task.title} onChange={changeTaskTitle} maxDisplayLength={15} />
           </Box>
         </Box>
 
@@ -116,6 +120,6 @@ export const TaskItem = ({ task, todolist, isLast = false }: Props) => {
           <DeleteIcon fontSize="small" />
         </IconButton>
       </ListItem>
-    </div>
+    </motion.div>
   )
 }

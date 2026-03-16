@@ -1,54 +1,104 @@
+// common/components/CreateItemForm/CreateItemForm.tsx
 import { type ChangeEvent, type KeyboardEvent, useState } from "react"
 import TextField from "@mui/material/TextField"
 import AddBoxIcon from "@mui/icons-material/AddBox"
 import IconButton from "@mui/material/IconButton"
+import Tooltip from "@mui/material/Tooltip"
+import CircularProgress from "@mui/material/CircularProgress"
+import Box from "@mui/material/Box"
 
 type Props = {
-  onCreateItem: (title: string) => void
+  onCreateItem: (title: string) => Promise<void> | void
   disabled?: boolean
+  placeholder?: string
+  // 👇 Убрали maxLength, так как не ограничиваем ввод
 }
 
-export const CreateItemForm = ({ onCreateItem, disabled }: Props) => {
+export const CreateItemForm = ({ onCreateItem, disabled = false, placeholder = "Enter a title" }: Props) => {
   const [title, setTitle] = useState("")
   const [error, setError] = useState<string | null>(null)
+  const [isAdding, setIsAdding] = useState(false)
 
-  const createItemHandler = () => {
+  const createItemHandler = async () => {
     const trimmedTitle = title.trim()
-    if (trimmedTitle !== "") {
-      onCreateItem(trimmedTitle)
-      setTitle("")
-    } else {
+
+    if (trimmedTitle === "") {
       setError("Title is required")
+      return
+    }
+
+    if (disabled || isAdding) {
+      setError("Please wait, adding in progress...")
+      return
+    }
+
+    setError(null)
+    setIsAdding(true)
+
+    try {
+      await onCreateItem(trimmedTitle)
+      setTitle("")
+    } catch (error) {
+      setError("Failed to create item. Try again.")
+      console.error("Create item error:", error)
+    } finally {
+      setIsAdding(false)
     }
   }
 
-  const changeTitleHandler = (event: ChangeEvent<HTMLInputElement>) => {
-    setTitle(event.currentTarget.value)
-    setError(null)
+  const changeTitleHandler = (e: ChangeEvent<HTMLInputElement>) => {
+    setTitle(e.currentTarget.value)
+    if (error) setError(null)
   }
 
-  const createItemOnEnterHandler = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
+  const createItemOnEnterHandler = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
       createItemHandler()
     }
   }
 
+  const isButtonDisabled = disabled || isAdding || !title.trim()
+
+  const getTooltipText = () => {
+    if (disabled || isAdding) return "Adding in progress..."
+    if (!title.trim()) return "Enter a title"
+    return "Add item"
+  }
+
   return (
-    <div>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
       <TextField
-        label={"Enter a title"}
-        variant={"outlined"}
+        size="small"
+        variant="outlined"
         value={title}
-        size={"small"}
-        error={!!error}
-        helperText={error}
         onChange={changeTitleHandler}
         onKeyDown={createItemOnEnterHandler}
-        disabled={disabled}
+        error={!!error}
+        helperText={error}
+        disabled={disabled || isAdding}
+        placeholder={placeholder}
+        fullWidth
+        // 👇 Убрали inputProps и FormHelperTextProps
       />
-      <IconButton onClick={createItemHandler} color={"primary"} disabled={disabled}>
-        <AddBoxIcon />
-      </IconButton>
-    </div>
+
+      <Tooltip title={getTooltipText()} arrow>
+        <span>
+          <IconButton
+            onClick={createItemHandler}
+            disabled={isButtonDisabled}
+            color="primary"
+            size="large"
+            sx={{
+              "&:hover": {
+                transform: "scale(1.1)",
+                transition: "transform 0.2s",
+              },
+            }}
+          >
+            {isAdding ? <CircularProgress size={24} /> : <AddBoxIcon fontSize="large" />}
+          </IconButton>
+        </span>
+      </Tooltip>
+    </Box>
   )
 }

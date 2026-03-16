@@ -31,7 +31,6 @@ export const FilterButtons = ({ todolist }: Props) => {
         display: "flex",
         gap: 1,
         width: "100%",
-        mt: 2,
       }}
     >
       <Button
@@ -45,7 +44,7 @@ export const FilterButtons = ({ todolist }: Props) => {
           textTransform: "uppercase",
         }}
       >
-        All
+        ALL
       </Button>
 
       <Button
@@ -59,7 +58,7 @@ export const FilterButtons = ({ todolist }: Props) => {
           textTransform: "uppercase",
         }}
       >
-        Active
+        ACTIVE
       </Button>
 
       <Button
@@ -73,7 +72,7 @@ export const FilterButtons = ({ todolist }: Props) => {
           textTransform: "uppercase",
         }}
       >
-        Completed
+        COMPLETED
       </Button>
     </Box>
   )

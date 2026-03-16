@@ -12,6 +12,7 @@ import { useTaskDragAndDrop } from "@/common/hooks/useTaskDragAndDrop"
 import Box from "@mui/material/Box"
 import Typography from "@mui/material/Typography"
 import Paper from "@mui/material/Paper"
+import { motion, AnimatePresence } from "framer-motion"
 
 type Props = {
   todolist: DomainTodolist
@@ -57,38 +58,65 @@ export const Tasks = ({ todolist }: Props) => {
       }}
     >
       {filteredTasks.length === 0 ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <Paper
+            variant="outlined"
+            sx={{
+              height: EMPTY_CONTAINER_HEIGHT,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              bgcolor: "transparent",
+              border: "1px dashed",
+              borderColor: "divider",
+            }}
+          >
+            <Typography variant="body2" color="text.secondary">
+              No tasks
+            </Typography>
+          </Paper>
+        </motion.div>
+      ) : (
         <Paper
           variant="outlined"
           sx={{
-            height: EMPTY_CONTAINER_HEIGHT,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            flex: 1,
             bgcolor: "transparent",
-            border: "1px dashed",
-            borderColor: "divider",
+            overflow: "hidden",
           }}
         >
-          <Typography variant="body2" color="text.secondary">
-            Тасок нет
-          </Typography>
-        </Paper>
-      ) : (
-        <Paper variant="outlined" sx={{ flex: 1, bgcolor: "transparent" }}>
           <DndContextWrapper items={taskIds} onDragEnd={handleDragEnd}>
             <List sx={{ p: 0 }}>
-              {filteredTasks.map((task, index) => (
-                <TaskItem key={task.id} task={task} todolist={todolist} isLast={index === filteredTasks.length - 1} />
-              ))}
+              <AnimatePresence mode="popLayout">
+                {filteredTasks.map((task, index) => (
+                  <motion.div
+                    key={task.id}
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    transition={{ duration: 0.2 }}
+                    layout
+                  >
+                    <TaskItem task={task} todolist={todolist} isLast={index === filteredTasks.length - 1} />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </List>
           </DndContextWrapper>
         </Paper>
       )}
 
       {showPagination && (
-        <Box sx={{ mt: 1 }}>
-          <TasksPagination totalCount={data?.totalCount || 0} page={page} setPage={setPage} />
-        </Box>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+          <Box sx={{ mt: 1 }}>
+            <TasksPagination totalCount={data?.totalCount || 0} page={page} setPage={setPage} />
+          </Box>
+        </motion.div>
       )}
     </Box>
   )

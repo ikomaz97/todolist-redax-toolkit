@@ -6,7 +6,7 @@ export const getListItemSx = (isTaskCompleted: boolean): SxProps<Theme> => ({
   justifyContent: "space-between",
   alignItems: "center",
   opacity: isTaskCompleted ? 0.5 : 1,
-  px: 2,
+  px: 1,
   py: 0,
   height: 48,
   backgroundColor: "#fff",

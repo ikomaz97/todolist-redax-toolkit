@@ -2,11 +2,11 @@
 import { CreateItemForm } from "@/common/components/CreateItemForm/CreateItemForm"
 import { useAddTaskMutation } from "@/features/todolists/api/tasksApi"
 import type { DomainTodolist } from "@/features/todolists/lib/types"
-import { FilterButtons } from "./FilterButtons/FilterButtons"
-import { Tasks } from "./Tasks/Tasks"
-import { TodolistTitle } from "./TodolistTitle/TodolistTitle"
 import Box from "@mui/material/Box"
 import Divider from "@mui/material/Divider"
+import { TodolistTitle } from "./TodolistTitle/TodolistTitle" // 👈 Упрощаем путь
+import { Tasks } from "./Tasks/Tasks" // 👈 Упрощаем путь
+import { FilterButtons } from "./FilterButtons/FilterButtons" // 👈 Упрощаем путь
 
 type Props = {
   todolist: DomainTodolist

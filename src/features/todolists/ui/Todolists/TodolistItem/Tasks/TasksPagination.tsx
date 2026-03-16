@@ -20,6 +20,11 @@ export const TasksPagination = ({ totalCount, page, setPage }: Props) => {
 
   if (pageCount <= 1) return null
 
+  const getTaskWord = (count: number): string => {
+    if (count === 1) return "task"
+    return "tasks"
+  }
+
   return (
     <Box
       sx={{
@@ -46,28 +51,8 @@ export const TasksPagination = ({ totalCount, page, setPage }: Props) => {
       />
 
       <Typography variant="caption" color="text.secondary">
-        Всего: {totalCount} {getTaskWord(totalCount)}
+        Total: {totalCount} {getTaskWord(totalCount)}
       </Typography>
     </Box>
   )
-}
-
-// Функция для правильного склонения слова "задача"
-const getTaskWord = (count: number): string => {
-  const lastDigit = count % 10
-  const lastTwoDigits = count % 100
-
-  if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
-    return "задач"
-  }
-
-  if (lastDigit === 1) {
-    return "задача"
-  }
-
-  if (lastDigit >= 2 && lastDigit <= 4) {
-    return "задачи"
-  }
-
-  return "задач"
 }
