@@ -42,7 +42,7 @@ export const Todolists = () => {
         <AnimatePresence>
           {todolists?.map((todolist) => (
             <SortableItem key={todolist.id} id={todolist.id}>
-              <Grid size={{ xs: 12, sm: 12, md: 7, lg: 9 }}>
+              <Grid size={{ xs: 12, sm: 12, md: 7, lg: 12 }}>
                 <Paper
                   component={motion.div}
                   layout
