@@ -50,7 +50,14 @@ export const Header = () => {
   }
 
   return (
-    <AppBar position="static" sx={{ mb: "30px" }}>
+    <AppBar
+      position="sticky"
+      sx={{
+        top: 0,
+        zIndex: (theme) => theme.zIndex.drawer + 1,
+        mb: "30px",
+      }}
+    >
       <Toolbar>
         <Container maxWidth={"lg"} sx={containerSx}>
           <IconButton color="inherit">
