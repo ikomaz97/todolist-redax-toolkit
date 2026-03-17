@@ -23,6 +23,7 @@ type Props = {
 
 export const DndContextWrapper = ({ items, children, onDragEnd }: Props) => {
   const [activeItem, setActiveItem] = useState<any>(null)
+  const [activeSize, setActiveSize] = useState<{ width: number; height: number } | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -37,10 +38,18 @@ export const DndContextWrapper = ({ items, children, onDragEnd }: Props) => {
     if (data) {
       setActiveItem(data)
     }
+
+    const initialRect = event.active.rect.current.initial
+    if (initialRect) {
+      setActiveSize({ width: initialRect.width, height: initialRect.height })
+    } else {
+      setActiveSize(null)
+    }
   }
 
   const handleDragEnd = (event: DragEndEvent) => {
     setActiveItem(null)
+    setActiveSize(null)
     onDragEnd(event)
   }
 
@@ -67,6 +76,14 @@ export const DndContextWrapper = ({ items, children, onDragEnd }: Props) => {
               backgroundColor: "white",
               border: "2px solid",
               borderColor: "primary.main",
+              ...(activeSize
+                ? {
+                    width: `${activeSize.width}px`,
+                    height: `${activeSize.height}px`,
+                    boxSizing: "border-box",
+                    overflow: "hidden",
+                  }
+                : null),
             }}
           >
             {activeItem.type === "task" && (

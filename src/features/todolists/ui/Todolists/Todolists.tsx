@@ -41,7 +41,17 @@ export const Todolists = () => {
       <DndContextWrapper items={todolistIds} onDragEnd={handleDragEnd}>
         <AnimatePresence>
           {todolists?.map((todolist) => (
-            <SortableItem key={todolist.id} id={todolist.id}>
+            <SortableItem
+              key={todolist.id}
+              id={todolist.id}
+              data={{
+                type: "todolist",
+                todolist: {
+                  id: todolist.id,
+                  title: todolist.title,
+                },
+              }}
+            >
               <Grid size={{ xs: 12, sm: 12, md: 7, lg: 12 }}>
                 <Paper
                   component={motion.div}

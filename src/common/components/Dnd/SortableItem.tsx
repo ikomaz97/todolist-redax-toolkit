@@ -6,11 +6,16 @@ import { ReactNode } from "react"
 type SortableItemProps = {
   id: string
   children: ReactNode
+  data?: Record<string, unknown>
   disabled?: boolean
 }
 
-export const SortableItem = ({ id, children, disabled = false }: SortableItemProps) => {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id, disabled })
+export const SortableItem = ({ id, children, data, disabled = false }: SortableItemProps) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+    data,
+    disabled,
+  })
 
   const style = {
     transform: CSS.Transform.toString(transform),
