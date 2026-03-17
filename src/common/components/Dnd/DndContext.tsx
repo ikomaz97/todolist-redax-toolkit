@@ -8,12 +8,12 @@ import {
   useSensors,
   closestCenter,
 } from "@dnd-kit/core"
-
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
-
 import { ReactNode, useState } from "react"
 import Paper from "@mui/material/Paper"
 import Typography from "@mui/material/Typography"
+import Box from "@mui/material/Box"
+import Checkbox from "@mui/material/Checkbox"
 
 type Props = {
   items: string[]
@@ -22,7 +22,7 @@ type Props = {
 }
 
 export const DndContextWrapper = ({ items, children, onDragEnd }: Props) => {
-  const [activeTitle, setActiveTitle] = useState<string | null>(null)
+  const [activeItem, setActiveItem] = useState<any>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -33,17 +33,14 @@ export const DndContextWrapper = ({ items, children, onDragEnd }: Props) => {
   )
 
   const handleDragStart = (event: DragStartEvent) => {
-    const element = event.active.data.current as any
-
-    if (element?.task?.title) {
-      setActiveTitle(element.task.title)
-    } else if (element?.todolist?.title) {
-      setActiveTitle(element.todolist.title)
+    const data = event.active.data.current
+    if (data) {
+      setActiveItem(data)
     }
   }
 
   const handleDragEnd = (event: DragEndEvent) => {
-    setActiveTitle(null)
+    setActiveItem(null)
     onDragEnd(event)
   }
 
@@ -59,18 +56,28 @@ export const DndContextWrapper = ({ items, children, onDragEnd }: Props) => {
       </SortableContext>
 
       <DragOverlay>
-        {activeTitle ? (
+        {activeItem && (
           <Paper
             sx={{
               px: 2,
               py: 1,
               boxShadow: 4,
               borderRadius: 1,
+              minWidth: 200,
+              backgroundColor: "white",
+              border: "2px solid",
+              borderColor: "primary.main",
             }}
           >
-            <Typography>{activeTitle}</Typography>
+            {activeItem.type === "task" && (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Checkbox checked={activeItem.task.status === 1} readOnly size="small" />
+                <Typography>{activeItem.task.title}</Typography>
+              </Box>
+            )}
+            {activeItem.type === "todolist" && <Typography variant="h6">{activeItem.todolist.title}</Typography>}
           </Paper>
-        ) : null}
+        )}
       </DragOverlay>
     </DndContext>
   )

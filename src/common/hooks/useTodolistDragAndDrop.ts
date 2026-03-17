@@ -1,4 +1,4 @@
-// features/todolists/hooks/useTodolistDragAndDrop.ts
+// common/hooks/useTodolistDragAndDrop.ts
 import { useReorderTodolistMutation } from "@/features/todolists/api/todolistsApi"
 import type { DomainTodolist } from "@/features/todolists/lib/types"
 import { DragEndEvent } from "@dnd-kit/core"
@@ -13,24 +13,18 @@ export const useTodolistDragAndDrop = ({ todolists }: UseTodolistDragAndDropProp
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event
-
     if (!todolists || active.id === over?.id) return
 
     const activeIndex = todolists.findIndex((t) => t.id === active.id)
     const overIndex = over ? todolists.findIndex((t) => t.id === over.id) : -1
-
     if (activeIndex === -1) return
 
-    let putAfterItemId: string | null // Убрали инициализацию = null
-
+    let putAfterItemId: string | null
     if (overIndex === -1) {
-      // В конец списка
       putAfterItemId = todolists[todolists.length - 1].id
     } else if (overIndex > activeIndex) {
-      // Перемещаем вниз
       putAfterItemId = todolists[overIndex].id
     } else {
-      // Перемещаем вверх
       putAfterItemId = overIndex > 0 ? todolists[overIndex - 1].id : null
     }
 

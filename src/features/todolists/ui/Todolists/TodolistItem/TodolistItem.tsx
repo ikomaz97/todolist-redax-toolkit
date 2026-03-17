@@ -17,18 +17,6 @@ type Props = {
   todolist: DomainTodolist
 }
 
-const TITLE_HEIGHT = 40
-const FORM_HEIGHT = 40
-const DIVIDER_HEIGHT = 2
-const TASKS_CONTAINER_HEIGHT = 200
-const FILTERS_HEIGHT = 40
-const PAGINATION_HEIGHT = 40
-const GAP = 16 // gap между элементами (2 * 8px)
-
-// Общая высота тудулиста
-const TOTAL_HEIGHT =
-  TITLE_HEIGHT + FORM_HEIGHT + DIVIDER_HEIGHT + TASKS_CONTAINER_HEIGHT + FILTERS_HEIGHT + PAGINATION_HEIGHT + GAP * 4
-
 export const TodolistItem = ({ todolist }: Props) => {
   const { id } = todolist
   const [addTask, { isLoading }] = useAddTaskMutation()
@@ -65,25 +53,21 @@ export const TodolistItem = ({ todolist }: Props) => {
       sx={{
         display: "flex",
         flexDirection: "column",
-        height: TOTAL_HEIGHT, // Фиксированная общая высота
+        height: "100%",
         gap: 2,
       }}
     >
-      <Box sx={{ height: TITLE_HEIGHT }}>
-        <TodolistTitle todolist={todolist} />
-      </Box>
+      <TodolistTitle todolist={todolist} />
 
-      <Box sx={{ height: FORM_HEIGHT }}>
-        <CreateItemForm onCreateItem={createTask} disabled={isLoading} placeholder="Enter a task title" />
-      </Box>
+      <CreateItemForm onCreateItem={createTask} disabled={isLoading} placeholder="Enter a task title" />
 
-      <Divider sx={{ height: DIVIDER_HEIGHT }} />
+      <Divider />
 
-      <Box sx={{ flex: 1 }}>
+      <Box sx={{ flex: 1, minHeight: 0 }}>
         <Tasks todolist={todolist} />
       </Box>
 
-      <Box sx={{ height: FILTERS_HEIGHT }}>
+      <Box sx={{ mt: "auto" }}>
         <FilterButtons todolist={todolist} />
       </Box>
 
