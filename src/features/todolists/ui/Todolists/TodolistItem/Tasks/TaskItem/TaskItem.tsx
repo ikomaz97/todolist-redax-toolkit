@@ -38,6 +38,9 @@ export const TaskItem = ({ task, todolist, isLast }: Props) => {
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task.id,
+    data: {
+      task,
+    },
   })
 
   const style = {
