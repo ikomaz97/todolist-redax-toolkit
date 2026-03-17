@@ -1,3 +1,4 @@
+// features/todolists/ui/Todolists/TodolistItem/Tasks/Tasks.tsx
 import { useGetTasksQuery } from "@/features/todolists/api/tasksApi"
 import List from "@mui/material/List"
 import { TaskItem } from "./TaskItem/TaskItem"
@@ -55,36 +56,15 @@ export const Tasks = ({ todolist }: Props) => {
         flexDirection: "column",
       }}
     >
-      {/* Контейнер задач */}
+      {/* Контейнер задач - БЕЗ СКРОЛЛА */}
       <Paper
         variant="outlined"
         sx={{
           height: TASKS_CONTAINER_HEIGHT,
           bgcolor: "transparent",
-
-          overflowY: "auto",
-          overflowX: "hidden",
-
+          overflow: "hidden", // 👈 СКРОЛЛА НЕТ
           display: "flex",
           flexDirection: "column",
-
-          /* Firefox */
-          scrollbarWidth: "thin",
-
-          /* Chrome / Edge */
-          "&::-webkit-scrollbar": {
-            width: "6px",
-          },
-          "&::-webkit-scrollbar-track": {
-            background: "transparent",
-          },
-          "&::-webkit-scrollbar-thumb": {
-            backgroundColor: "rgba(0,0,0,0.2)",
-            borderRadius: "6px",
-          },
-          "&::-webkit-scrollbar-button": {
-            display: "none",
-          },
         }}
       >
         {filteredTasks.length === 0 ? (
