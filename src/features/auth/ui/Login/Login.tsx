@@ -3,10 +3,7 @@ import { ResultCode } from "@/common/enums"
 import { useAppDispatch, useAppSelector } from "@/common/hooks"
 import { getTheme } from "@/common/theme"
 
-import {
-  useLoginMutation,
-  useLazyGetCaptchaQuery,
-} from "@/features/auth/api/authApi"
+import { useLoginMutation, useLazyGetCaptchaQuery } from "@/features/auth/api/authApi"
 
 import { type LoginInputs, loginSchema } from "@/features/auth/lib/schemas"
 
@@ -21,6 +18,10 @@ import FormLabel from "@mui/material/FormLabel"
 import Grid from "@mui/material/Grid"
 import TextField from "@mui/material/TextField"
 import Alert from "@mui/material/Alert"
+import InputAdornment from "@mui/material/InputAdornment"
+import IconButton from "@mui/material/IconButton"
+import Visibility from "@mui/icons-material/Visibility"
+import VisibilityOff from "@mui/icons-material/VisibilityOff"
 
 import { Controller, type SubmitHandler, useForm } from "react-hook-form"
 import { useState } from "react"
@@ -38,6 +39,13 @@ export const Login = () => {
 
   const [captchaUrl, setCaptchaUrl] = useState<string | null>(null)
   const [loginError, setLoginError] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show)
+
+  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault()
+  }
 
   const {
     register,
@@ -84,10 +92,7 @@ export const Login = () => {
 
   return (
     <Grid container justifyContent="center">
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        style={{ maxWidth: 400, width: "100%" }}
-      >
+      <form onSubmit={handleSubmit(onSubmit)} style={{ maxWidth: 400, width: "100%" }}>
         <FormControl fullWidth>
           <FormLabel>
             <p>
@@ -123,32 +128,28 @@ export const Login = () => {
           )}
 
           <FormGroup>
-            <TextField
-              label="Email"
-              margin="normal"
-              error={!!errors.email}
-              {...register("email")}
-            />
+            <TextField label="Email" margin="normal" error={!!errors.email} {...register("email")} />
 
-            {errors.email && (
-              <span className={styles.errorMessage}>
-                {errors.email.message}
-              </span>
-            )}
+            {errors.email && <span className={styles.errorMessage}>{errors.email.message}</span>}
 
             <TextField
-              type="password"
+              type={showPassword ? "text" : "password"}
               label="Password"
               margin="normal"
               error={!!errors.password}
               {...register("password")}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={handleClickShowPassword} onMouseDown={handleMouseDownPassword} edge="end">
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
 
-            {errors.password && (
-              <span className={styles.errorMessage}>
-                {errors.password.message}
-              </span>
-            )}
+            {errors.password && <span className={styles.errorMessage}>{errors.password.message}</span>}
 
             <FormControlLabel
               label="Remember me"
@@ -156,9 +157,7 @@ export const Login = () => {
                 <Controller
                   name="rememberMe"
                   control={control}
-                  render={({ field }) => (
-                    <Checkbox {...field} checked={field.value} />
-                  )}
+                  render={({ field }) => <Checkbox {...field} checked={field.value} />}
                 />
               }
             />
@@ -175,20 +174,11 @@ export const Login = () => {
                   }}
                 />
 
-                <TextField
-                  label="Enter symbols"
-                  margin="normal"
-                  {...register("captcha")}
-                />
+                <TextField label="Enter symbols" margin="normal" {...register("captcha")} />
               </>
             )}
 
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              sx={{ mt: 2 }}
-            >
+            <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
               Login
             </Button>
           </FormGroup>
