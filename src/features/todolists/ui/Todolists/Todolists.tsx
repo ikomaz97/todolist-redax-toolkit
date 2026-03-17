@@ -38,7 +38,36 @@ export const Todolists = () => {
 
   return (
     <Grid container spacing={3} sx={{ p: 3 }}>
-      <DndContextWrapper items={todolistIds} onDragEnd={handleDragEnd}>
+      <DndContextWrapper
+        items={todolistIds}
+        onDragEnd={handleDragEnd}
+        renderOverlay={(activeItem, activeSize) => {
+          if (activeItem?.type !== "todolist" || !activeItem.todolist) return null
+
+          return (
+            <Paper
+              sx={{
+                p: "0 20px 20px 20px",
+                boxShadow: 4,
+                borderRadius: 1,
+                backgroundColor: "white",
+                border: "2px solid",
+                borderColor: "primary.main",
+                ...(activeSize
+                  ? {
+                      width: `${activeSize.width}px`,
+                      height: `${activeSize.height}px`,
+                      boxSizing: "border-box",
+                      overflow: "hidden",
+                    }
+                  : null),
+              }}
+            >
+              <TodolistItem todolist={activeItem.todolist} />
+            </Paper>
+          )
+        }}
+      >
         <AnimatePresence>
           {todolists?.map((todolist) => (
             <SortableItem
@@ -46,10 +75,7 @@ export const Todolists = () => {
               id={todolist.id}
               data={{
                 type: "todolist",
-                todolist: {
-                  id: todolist.id,
-                  title: todolist.title,
-                },
+                todolist,
               }}
             >
               <Grid size={{ xs: 12, sm: 12, md: 7, lg: 12 }}>

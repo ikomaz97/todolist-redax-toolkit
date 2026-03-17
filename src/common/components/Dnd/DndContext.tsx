@@ -19,9 +19,10 @@ type Props = {
   items: string[]
   children: ReactNode
   onDragEnd: (event: DragEndEvent) => void
+  renderOverlay?: (activeData: any, size: { width: number; height: number } | null) => ReactNode
 }
 
-export const DndContextWrapper = ({ items, children, onDragEnd }: Props) => {
+export const DndContextWrapper = ({ items, children, onDragEnd, renderOverlay }: Props) => {
   const [activeItem, setActiveItem] = useState<any>(null)
   const [activeSize, setActiveSize] = useState<{ width: number; height: number } | null>(null)
 
@@ -65,36 +66,39 @@ export const DndContextWrapper = ({ items, children, onDragEnd }: Props) => {
       </SortableContext>
 
       <DragOverlay>
-        {activeItem && (
-          <Paper
-            sx={{
-              px: 2,
-              py: 1,
-              boxShadow: 4,
-              borderRadius: 1,
-              minWidth: 200,
-              backgroundColor: "white",
-              border: "2px solid",
-              borderColor: "primary.main",
-              ...(activeSize
-                ? {
-                    width: `${activeSize.width}px`,
-                    height: `${activeSize.height}px`,
-                    boxSizing: "border-box",
-                    overflow: "hidden",
-                  }
-                : null),
-            }}
-          >
-            {activeItem.type === "task" && (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Checkbox checked={activeItem.task.status === 1} readOnly size="small" />
-                <Typography>{activeItem.task.title}</Typography>
-              </Box>
-            )}
-            {activeItem.type === "todolist" && <Typography variant="h6">{activeItem.todolist.title}</Typography>}
-          </Paper>
-        )}
+        {activeItem &&
+          (renderOverlay ? (
+            renderOverlay(activeItem, activeSize)
+          ) : (
+            <Paper
+              sx={{
+                px: 2,
+                py: 1,
+                boxShadow: 4,
+                borderRadius: 1,
+                minWidth: 200,
+                backgroundColor: "white",
+                border: "2px solid",
+                borderColor: "primary.main",
+                ...(activeSize
+                  ? {
+                      width: `${activeSize.width}px`,
+                      height: `${activeSize.height}px`,
+                      boxSizing: "border-box",
+                      overflow: "hidden",
+                    }
+                  : null),
+              }}
+            >
+              {activeItem.type === "task" && (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Checkbox checked={activeItem.task.status === 1} readOnly size="small" />
+                  <Typography>{activeItem.task.title}</Typography>
+                </Box>
+              )}
+              {activeItem.type === "todolist" && <Typography variant="h6">{activeItem.todolist.title}</Typography>}
+            </Paper>
+          ))}
       </DragOverlay>
     </DndContext>
   )
