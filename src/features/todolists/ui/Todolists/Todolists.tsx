@@ -8,9 +8,11 @@ import { Alert } from "@mui/material"
 import { DndContextWrapper } from "@/common/components/Dnd/DndContext"
 import { SortableItem } from "@/common/components/Dnd/SortableItem"
 import { useTodolistDragAndDrop } from "@/common/hooks/useTodolistDragAndDrop"
+import { useTheme } from "@mui/material/styles"
 import { motion, AnimatePresence } from "framer-motion"
 
 export const Todolists = () => {
+  const theme = useTheme()
   const { data: todolists, isLoading, error } = useGetTodolistsQuery()
   const { handleDragEnd, todolistIds } = useTodolistDragAndDrop({ todolists: todolists || [] })
 
@@ -50,9 +52,9 @@ export const Todolists = () => {
                 p: "0 20px 20px 20px",
                 boxShadow: 4,
                 borderRadius: 1,
-                backgroundColor: "white",
+                backgroundColor: theme.palette.background.paper,
                 border: "2px solid",
-                borderColor: "primary.main",
+                borderColor: theme.palette.divider,
                 ...(activeSize
                   ? {
                       width: `${activeSize.width}px`,

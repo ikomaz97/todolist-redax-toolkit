@@ -14,6 +14,7 @@ import Paper from "@mui/material/Paper"
 import Typography from "@mui/material/Typography"
 import Box from "@mui/material/Box"
 import Checkbox from "@mui/material/Checkbox"
+import { useTheme } from "@mui/material/styles"
 
 type Props = {
   items: string[]
@@ -23,6 +24,7 @@ type Props = {
 }
 
 export const DndContextWrapper = ({ items, children, onDragEnd, renderOverlay }: Props) => {
+  const theme = useTheme()
   const [activeItem, setActiveItem] = useState<any>(null)
   const [activeSize, setActiveSize] = useState<{ width: number; height: number } | null>(null)
 
@@ -77,9 +79,9 @@ export const DndContextWrapper = ({ items, children, onDragEnd, renderOverlay }:
                 boxShadow: 4,
                 borderRadius: 1,
                 minWidth: 200,
-                backgroundColor: "white",
+                backgroundColor: theme.palette.background.paper,
                 border: "2px solid",
-                borderColor: "primary.main",
+                borderColor: theme.palette.divider,
                 ...(activeSize
                   ? {
                       width: `${activeSize.width}px`,

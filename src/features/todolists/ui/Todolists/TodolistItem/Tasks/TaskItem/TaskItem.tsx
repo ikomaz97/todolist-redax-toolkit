@@ -9,6 +9,7 @@ import Checkbox from "@mui/material/Checkbox"
 import IconButton from "@mui/material/IconButton"
 import ListItem from "@mui/material/ListItem"
 import Box from "@mui/material/Box"
+import { useTheme } from "@mui/material/styles"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { motion } from "framer-motion"
@@ -23,6 +24,7 @@ type Props = {
 }
 
 export const TaskItem = ({ task, todolist, isLast }: Props) => {
+  const theme = useTheme()
   const [removeTask] = useRemoveTaskMutation()
   const [updateTask] = useUpdateTaskMutation()
   const [snackbarOpen, setSnackbarOpen] = useState(false)
@@ -91,13 +93,16 @@ export const TaskItem = ({ task, todolist, isLast }: Props) => {
             justifyContent: "space-between",
             height: 48,
             px: 1,
-            borderBottom: isLast ? "none" : "1px solid",
-            borderColor: "divider",
+            borderTop: "1px solid",
+            borderLeft: "1px solid",
+            borderRight: "1px solid",
+            borderBottom: isLast ? "1px solid" : "none",
+            borderColor: theme.palette.divider,
             cursor: isDragging ? "grabbing" : "grab",
-            backgroundColor: "#fff",
+            backgroundColor: theme.palette.background.paper,
             opacity: isCompleted ? 0.5 : 1,
             "&:hover": {
-              backgroundColor: "#f5f5f5",
+              backgroundColor: theme.palette.action.hover,
             },
           }}
         >

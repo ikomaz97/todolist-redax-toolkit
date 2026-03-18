@@ -12,6 +12,7 @@ import { useTaskDragAndDrop } from "@/common/hooks/useTaskDragAndDrop"
 import Box from "@mui/material/Box"
 import Typography from "@mui/material/Typography"
 import Paper from "@mui/material/Paper"
+import { useTheme } from "@mui/material/styles"
 import { motion, AnimatePresence } from "framer-motion"
 
 type Props = {
@@ -39,6 +40,7 @@ export const Tasks = ({ todolist }: Props) => {
     filter,
   })
 
+  const theme = useTheme()
   const showPagination = (data?.totalCount || 0) > PAGE_SIZE
 
   if (error) {
@@ -61,7 +63,7 @@ export const Tasks = ({ todolist }: Props) => {
         variant="outlined"
         sx={{
           height: TASKS_CONTAINER_HEIGHT,
-          bgcolor: "transparent",
+          bgcolor: theme.palette.background.paper,
           overflow: "hidden", // 👈 СКРОЛЛА НЕТ
           display: "flex",
           flexDirection: "column",
