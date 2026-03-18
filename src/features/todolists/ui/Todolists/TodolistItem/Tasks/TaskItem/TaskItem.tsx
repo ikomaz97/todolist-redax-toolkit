@@ -20,10 +20,12 @@ import Alert from "@mui/material/Alert"
 type Props = {
   task: DomainTask
   todolist: DomainTodolist
-  isLast?: boolean
+  // 👇 Убираем isLast, так как он больше не нужен
+  // isLast?: boolean
 }
 
-export const TaskItem = ({ task, todolist, isLast }: Props) => {
+export const TaskItem = ({ task, todolist }: Props) => {
+  // 👈 Убираем isLast из пропсов
   const theme = useTheme()
   const [removeTask] = useRemoveTaskMutation()
   const [updateTask] = useUpdateTaskMutation()
@@ -95,17 +97,16 @@ export const TaskItem = ({ task, todolist, isLast }: Props) => {
             justifyContent: "space-between",
             height: 48,
             px: 1,
-            width: "100%", // 👈 На всю ширину
-            border: "1px solid",
-            borderColor: borderColor,
-            borderBottom: isLast ? "1px solid" : "none",
-            borderBottomColor: borderColor,
-            borderRadius: 1,
-            marginBottom: "-1px",
-            ...(isLast && {
-              borderBottomLeftRadius: 4,
-              borderBottomRightRadius: 4,
-            }),
+            width: "100%",
+            // 👇 ВСЕ ЗАДАЧИ имеют только верхнюю границу (нижняя от контейнера)
+            borderTop: "1px solid",
+            borderTopColor: borderColor,
+            borderLeft: "1px solid",
+            borderLeftColor: borderColor,
+            borderRight: "1px solid",
+            borderRightColor: borderColor,
+            borderBottom: "none",
+            borderRadius: 0,
             cursor: isDragging ? "grabbing" : "grab",
             backgroundColor: theme.palette.background.paper,
             opacity: isCompleted ? 0.5 : 1,

@@ -63,14 +63,19 @@ export const Tasks = ({ todolist }: Props) => {
           alignItems: "center",
           justifyContent: "space-between",
           height: rect ? `${rect.height}px` : 48,
-          width: rect ? `${rect.width}px` : "100%", // 👈 На всю ширину
+          width: rect ? `${rect.width}px` : "100%",
           px: 1,
-          border: "1px solid",
-          borderColor: borderColor,
+          borderTop: "1px solid",
+          borderTopColor: borderColor,
+          borderLeft: "1px solid",
+          borderLeftColor: borderColor,
+          borderRight: "1px solid",
+          borderRightColor: borderColor,
+          borderBottom: "none",
           backgroundColor: theme.palette.background.paper,
           opacity: 0.9,
           boxShadow: 4,
-          borderRadius: 1,
+          borderRadius: 0,
           boxSizing: "border-box",
         }}
       >
@@ -118,8 +123,6 @@ export const Tasks = ({ todolist }: Props) => {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
-      {" "}
-      {/* 👈 На всю ширину */}
       {/* Контейнер задач */}
       <Paper
         variant="outlined"
@@ -129,11 +132,12 @@ export const Tasks = ({ todolist }: Props) => {
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
+          border: "1px solid",
           borderColor: borderColor,
           p: 0,
           m: 0,
           borderRadius: 1,
-          width: "100%", // 👈 На всю ширину
+          width: "100%",
         }}
       >
         {filteredTasks.length === 0 ? (
@@ -144,7 +148,7 @@ export const Tasks = ({ todolist }: Props) => {
               alignItems: "center",
               justifyContent: "center",
               border: "none",
-              width: "100%", // 👈 На всю ширину
+              width: "100%",
             }}
           >
             <Typography variant="body2" sx={{ color: theme.palette.text.primary }}>
@@ -156,40 +160,47 @@ export const Tasks = ({ todolist }: Props) => {
             <List
               sx={{
                 p: 0,
-                width: "100%", // 👈 На всю ширину
+                width: "100%",
                 "& .MuiListItem-root": {
                   py: 0,
                   px: 1,
-                  width: "100%", // 👈 На всю ширину
+                  width: "100%",
                 },
               }}
             >
               <AnimatePresence mode="popLayout">
-                {filteredTasks.map((task, index) => (
-                  <motion.div
-                    key={task.id}
-                    layout
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 20 }}
-                    transition={{ duration: 0.2 }}
-                    ref={(el) => {
-                      itemRefs.current[task.id] = el
-                    }}
-                    style={{ width: "100%" }} // 👈 На всю ширину
-                  >
-                    <TaskItem task={task} todolist={todolist} isLast={index === filteredTasks.length - 1} />
-                  </motion.div>
-                ))}
+                {filteredTasks.map(
+                  (
+                    task, // 👇 Убрали index, так как не используем
+                  ) => (
+                    <motion.div
+                      key={task.id}
+                      layout
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 20 }}
+                      transition={{ duration: 0.2 }}
+                      ref={(el) => {
+                        itemRefs.current[task.id] = el
+                      }}
+                      style={{ width: "100%" }}
+                    >
+                      <TaskItem
+                        task={task}
+                        todolist={todolist}
+                        // 👇 isLast ПОЛНОСТЬЮ УБРАН
+                      />
+                    </motion.div>
+                  ),
+                )}
               </AnimatePresence>
             </List>
           </DndContextWrapper>
         )}
       </Paper>
+
       {/* Пагинация */}
       <Box sx={{ height: PAGINATION_HEIGHT, mt: 1, width: "100%" }}>
-        {" "}
-        {/* 👈 На всю ширину */}
         {showPagination ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
             <TasksPagination totalCount={data?.totalCount || 0} page={page} setPage={setPage} />
