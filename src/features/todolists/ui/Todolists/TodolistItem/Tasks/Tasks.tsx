@@ -31,7 +31,6 @@ export const Tasks = ({ todolist }: Props) => {
   const theme = useTheme()
   const isLight = theme.palette.mode === "light"
 
-  // 👇 Сохраняем ref для каждой задачи
   const itemRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   const { data, isLoading, error } = useGetTasksQuery({
@@ -48,12 +47,10 @@ export const Tasks = ({ todolist }: Props) => {
     filter,
   })
 
-  // 👇 Функция для рендера оверлея при перетаскивании задачи
   const renderTaskOverlay = (activeId: string) => {
     const activeTask = data?.items.find((t) => t.id === activeId)
     if (!activeTask) return null
 
-    // 👇 Получаем размеры исходного элемента
     const activeElement = itemRefs.current[activeId]
     const rect = activeElement?.getBoundingClientRect()
     const isCompleted = activeTask.status === TaskStatus.Completed
@@ -66,7 +63,7 @@ export const Tasks = ({ todolist }: Props) => {
           alignItems: "center",
           justifyContent: "space-between",
           height: rect ? `${rect.height}px` : 48,
-          width: rect ? `${rect.width}px` : "auto",
+          width: rect ? `${rect.width}px` : "100%", // 👈 На всю ширину
           px: 1,
           border: "1px solid",
           borderColor: borderColor,
@@ -120,7 +117,9 @@ export const Tasks = ({ todolist }: Props) => {
   const borderColor = isLight ? "rgba(0, 0, 0, 0.23)" : "rgba(255, 255, 255, 0.23)"
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column" }}>
+    <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
+      {" "}
+      {/* 👈 На всю ширину */}
       {/* Контейнер задач */}
       <Paper
         variant="outlined"
@@ -134,6 +133,7 @@ export const Tasks = ({ todolist }: Props) => {
           p: 0,
           m: 0,
           borderRadius: 1,
+          width: "100%", // 👈 На всю ширину
         }}
       >
         {filteredTasks.length === 0 ? (
@@ -144,6 +144,7 @@ export const Tasks = ({ todolist }: Props) => {
               alignItems: "center",
               justifyContent: "center",
               border: "none",
+              width: "100%", // 👈 На всю ширину
             }}
           >
             <Typography variant="body2" sx={{ color: theme.palette.text.primary }}>
@@ -151,18 +152,15 @@ export const Tasks = ({ todolist }: Props) => {
             </Typography>
           </Box>
         ) : (
-          <DndContextWrapper
-            items={taskIds}
-            onDragEnd={handleDragEnd}
-            renderOverlay={renderTaskOverlay} // 👈 ВАЖНО: передаем overlay для задач
-          >
+          <DndContextWrapper items={taskIds} onDragEnd={handleDragEnd} renderOverlay={renderTaskOverlay}>
             <List
               sx={{
                 p: 0,
-                width: "100%",
+                width: "100%", // 👈 На всю ширину
                 "& .MuiListItem-root": {
                   py: 0,
                   px: 1,
+                  width: "100%", // 👈 На всю ширину
                 },
               }}
             >
@@ -177,7 +175,8 @@ export const Tasks = ({ todolist }: Props) => {
                     transition={{ duration: 0.2 }}
                     ref={(el) => {
                       itemRefs.current[task.id] = el
-                    }} // 👈 Сохраняем ref
+                    }}
+                    style={{ width: "100%" }} // 👈 На всю ширину
                   >
                     <TaskItem task={task} todolist={todolist} isLast={index === filteredTasks.length - 1} />
                   </motion.div>
@@ -187,9 +186,10 @@ export const Tasks = ({ todolist }: Props) => {
           </DndContextWrapper>
         )}
       </Paper>
-
       {/* Пагинация */}
-      <Box sx={{ height: PAGINATION_HEIGHT, mt: 1 }}>
+      <Box sx={{ height: PAGINATION_HEIGHT, mt: 1, width: "100%" }}>
+        {" "}
+        {/* 👈 На всю ширину */}
         {showPagination ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
             <TasksPagination totalCount={data?.totalCount || 0} page={page} setPage={setPage} />

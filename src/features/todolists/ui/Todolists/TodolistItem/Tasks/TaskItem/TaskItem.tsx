@@ -81,12 +81,11 @@ export const TaskItem = ({ task, todolist, isLast }: Props) => {
 
   const isCompleted = task.status === TaskStatus.Completed
 
-  // 👇 Цвета границ в зависимости от темы
   const borderColor = theme.palette.mode === "light" ? "rgba(0, 0, 0, 0.12)" : "rgba(255, 255, 255, 0.23)"
 
   return (
     <>
-      <motion.div ref={setNodeRef} style={style} layout="position" whileHover={{ scale: 1.01 }}>
+      <motion.div ref={setNodeRef} style={{ ...style, width: "100%" }} layout="position" whileHover={{ scale: 1.01 }}>
         <ListItem
           {...attributes}
           {...listeners}
@@ -96,17 +95,13 @@ export const TaskItem = ({ task, todolist, isLast }: Props) => {
             justifyContent: "space-between",
             height: 48,
             px: 1,
-            // 👇 ВИДИМЫЕ ГРАНИЦЫ
+            width: "100%", // 👈 На всю ширину
             border: "1px solid",
             borderColor: borderColor,
-            // 👇 Для последнего элемента все границы, для остальных - без нижней
             borderBottom: isLast ? "1px solid" : "none",
             borderBottomColor: borderColor,
-            // 👡 Скругление углов
             borderRadius: 1,
-            // 👇 Убираем дублирование границ
             marginBottom: "-1px",
-            // 👇 Первый элемент со скруглением сверху
             ...(isLast && {
               borderBottomLeftRadius: 4,
               borderBottomRightRadius: 4,
@@ -117,7 +112,6 @@ export const TaskItem = ({ task, todolist, isLast }: Props) => {
             "&:hover": {
               backgroundColor: theme.palette.action.hover,
             },
-            // 👇 Убираем лишние отступы
             m: 0,
             py: 0,
           }}
