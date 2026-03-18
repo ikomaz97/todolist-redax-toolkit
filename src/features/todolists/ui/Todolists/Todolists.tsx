@@ -9,9 +9,10 @@ import { SortableItem } from "@/common/components/Dnd/SortableItem"
 import { useTodolistDragAndDrop } from "@/common/hooks/useTodolistDragAndDrop"
 import { motion, AnimatePresence } from "framer-motion"
 import { useTheme } from "@mui/material/styles"
-import { CreateItemForm } from "@/common/components/CreateItemForm/CreateItemForm" // 👈 Импортируем форму
+import { CreateItemForm } from "@/common/components/CreateItemForm/CreateItemForm"
 import Box from "@mui/material/Box"
 import Container from "@mui/material/Container"
+import { useRef } from "react"
 
 export const Todolists = () => {
   const theme = useTheme()
@@ -19,15 +20,48 @@ export const Todolists = () => {
 
   const { data: todolists, isLoading, error } = useGetTodolistsQuery()
   const { handleDragEnd, todolistIds } = useTodolistDragAndDrop({ todolists: todolists || [] })
-  const [addTodolist] = useAddTodolistMutation() // 👈 Хук для создания тудулиста
+  const [addTodolist] = useAddTodolistMutation()
+
+  // 👇 Сохраняем ref для каждого тудулиста
+  const itemRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   const addTodolistHandler = async (title: string) => {
     try {
       await addTodolist(title).unwrap()
     } catch (error) {
       console.error("Failed to add todolist:", error)
-      throw error // 👈 Пробрасываем ошибку для обработки в форме
+      throw error
     }
+  }
+
+  // 👇 Функция для рендера оверлея при перетаскивании
+  const renderOverlay = (activeId: string) => {
+    const activeTodolist = todolists?.find((t) => t.id === activeId)
+    if (!activeTodolist) return null
+
+    // 👇 Получаем размеры исходного элемента
+    const activeElement = itemRefs.current[activeId]
+    const rect = activeElement?.getBoundingClientRect()
+
+    return (
+      <Paper
+        sx={{
+          p: "0 20px 20px 20px",
+          boxShadow: 4,
+          borderRadius: 1,
+          backgroundColor: isLight ? "#FFFFFF" : "#12455F",
+          border: "2px solid",
+          borderColor: "primary.main",
+          width: rect ? `${rect.width}px` : "auto",
+          height: rect ? `${rect.height}px` : "auto",
+          boxSizing: "border-box",
+          overflow: "hidden",
+          opacity: 0.9,
+        }}
+      >
+        <TodolistItem todolist={activeTodolist} />
+      </Paper>
+    )
   }
 
   if (isLoading) {
@@ -60,22 +94,26 @@ export const Todolists = () => {
 
   return (
     <Container maxWidth="lg">
-      {/* 👇 Форма создания тудулиста с отступом сверху */}
+      {/* Форма создания тудулиста */}
       <Box
         sx={{
-          mt: 3, // Отступ сверху от полоски загрузки
-          mb: 3, // Отступ снизу до списка тудулистов
+          mt: 3,
+          mb: 3,
           width: "100%",
-          maxWidth: 600, // Ограничиваем ширину для красоты
-          mx: "auto", // Центрируем
+          maxWidth: 600,
+          mx: "auto",
         }}
       >
         <CreateItemForm onCreateItem={addTodolistHandler} placeholder="Enter todolist title" disabled={isLoading} />
       </Box>
 
-      {/* 👇 Список тудулистов */}
+      {/* Список тудулистов */}
       <Grid container spacing={3}>
-        <DndContextWrapper items={todolistIds} onDragEnd={handleDragEnd}>
+        <DndContextWrapper
+          items={todolistIds}
+          onDragEnd={handleDragEnd}
+          renderOverlay={renderOverlay} // 👈 Передаем функцию для оверлея
+        >
           <AnimatePresence>
             {todolists?.map((todolist) => (
               <SortableItem
@@ -106,6 +144,9 @@ export const Todolists = () => {
                         boxShadow: 4,
                       },
                     }}
+                    ref={(el) => {
+                      itemRefs.current[todolist.id] = el
+                    }} // 👈 Сохраняем ref
                   >
                     <TodolistItem todolist={todolist} />
                   </Paper>

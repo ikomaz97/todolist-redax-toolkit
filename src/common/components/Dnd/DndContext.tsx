@@ -1,58 +1,39 @@
 import {
   DndContext,
+  closestCenter,
   DragEndEvent,
-  DragStartEvent,
   DragOverlay,
-  PointerSensor,
   useSensor,
   useSensors,
-  closestCenter,
+  PointerSensor,
 } from "@dnd-kit/core"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { ReactNode, useState } from "react"
-import Paper from "@mui/material/Paper"
-import Typography from "@mui/material/Typography"
-import Box from "@mui/material/Box"
-import Checkbox from "@mui/material/Checkbox"
-import { useTheme } from "@mui/material/styles"
 
 type Props = {
   items: string[]
-  children: ReactNode
   onDragEnd: (event: DragEndEvent) => void
-  renderOverlay?: (activeData: any, size: { width: number; height: number } | null) => ReactNode
+  children: ReactNode
+  renderOverlay?: (activeId: string) => ReactNode
 }
 
-export const DndContextWrapper = ({ items, children, onDragEnd, renderOverlay }: Props) => {
-  const theme = useTheme()
-  const [activeItem, setActiveItem] = useState<any>(null)
-  const [activeSize, setActiveSize] = useState<{ width: number; height: number } | null>(null)
+export const DndContextWrapper = ({ items, onDragEnd, children, renderOverlay }: Props) => {
+  const [activeId, setActiveId] = useState<string | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 6,
+        distance: 8,
       },
     }),
   )
 
-  const handleDragStart = (event: DragStartEvent) => {
-    const data = event.active.data.current
-    if (data) {
-      setActiveItem(data)
-    }
-
-    const initialRect = event.active.rect.current.initial
-    if (initialRect) {
-      setActiveSize({ width: initialRect.width, height: initialRect.height })
-    } else {
-      setActiveSize(null)
-    }
+  const handleDragStart = (event: any) => {
+    setActiveId(event.active.id)
   }
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    setActiveItem(null)
-    setActiveSize(null)
+  const handleDragEndWrapper = (event: DragEndEvent) => {
+    setActiveId(null)
     onDragEnd(event)
   }
 
@@ -61,47 +42,13 @@ export const DndContextWrapper = ({ items, children, onDragEnd, renderOverlay }:
       sensors={sensors}
       collisionDetection={closestCenter}
       onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
+      onDragEnd={handleDragEndWrapper}
     >
       <SortableContext items={items} strategy={verticalListSortingStrategy}>
         {children}
       </SortableContext>
 
-      <DragOverlay>
-        {activeItem &&
-          (renderOverlay ? (
-            renderOverlay(activeItem, activeSize)
-          ) : (
-            <Paper
-              sx={{
-                px: 2,
-                py: 1,
-                boxShadow: 4,
-                borderRadius: 1,
-                minWidth: 200,
-                backgroundColor: theme.palette.background.paper,
-                border: "2px solid",
-                borderColor: theme.palette.divider,
-                ...(activeSize
-                  ? {
-                      width: `${activeSize.width}px`,
-                      height: `${activeSize.height}px`,
-                      boxSizing: "border-box",
-                      overflow: "hidden",
-                    }
-                  : null),
-              }}
-            >
-              {activeItem.type === "task" && (
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Checkbox checked={activeItem.task.status === 1} readOnly size="small" />
-                  <Typography>{activeItem.task.title}</Typography>
-                </Box>
-              )}
-              {activeItem.type === "todolist" && <Typography variant="h6">{activeItem.todolist.title}</Typography>}
-            </Paper>
-          ))}
-      </DragOverlay>
+      <DragOverlay>{activeId && renderOverlay ? renderOverlay(activeId) : null}</DragOverlay>
     </DndContext>
   )
 }
