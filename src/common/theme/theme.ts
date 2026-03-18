@@ -1,4 +1,4 @@
-import type { ThemeMode } from "@/app/app-slice.ts"
+import type { ThemeMode } from "@/app/app-slice"
 import { createTheme } from "@mui/material/styles"
 
 export const getTheme = (themeMode: ThemeMode) => {
@@ -6,13 +6,13 @@ export const getTheme = (themeMode: ThemeMode) => {
     palette: {
       mode: themeMode,
       primary: {
-        main: "#0288D1", // Глубокий синий
+        main: "#0288D1",
         light: "#4EB5E5",
         dark: "#01579B",
         contrastText: "#FFFFFF",
       },
       secondary: {
-        main: "#26A69A", // Бирюзовый
+        main: "#26A69A",
         light: "#64D8CB",
         dark: "#00766C",
         contrastText: "#FFFFFF",
@@ -26,15 +26,18 @@ export const getTheme = (themeMode: ThemeMode) => {
         secondary: themeMode === "light" ? "#00766C" : "#80CBC4",
       },
     },
+
     typography: {
       fontFamily: '"Raleway", "Roboto", sans-serif',
       h4: {
         fontWeight: 600,
       },
     },
+
     shape: {
       borderRadius: 10,
     },
+
     components: {
       MuiButton: {
         styleOverrides: {
@@ -50,15 +53,65 @@ export const getTheme = (themeMode: ThemeMode) => {
           },
         },
       },
-      MuiTextField: {
+
+      // ✅ Основной компонент для полей ввода
+      MuiOutlinedInput: {
         styleOverrides: {
-          root: {
-            "& .MuiOutlinedInput-root": {
-              "&:hover fieldset": {
-                borderColor: "#0288D1",
-              },
+          root: ({ theme }) => ({
+            backgroundColor: theme.palette.mode === "light" ? "#FFFFFF" : "#1e3a4a",
+            borderRadius: 10,
+
+            "& fieldset": {
+              borderColor: theme.palette.mode === "light" ? "rgba(0, 0, 0, 0.23)" : "rgba(255, 255, 255, 0.23)",
             },
-          },
+
+            "&:hover fieldset": {
+              borderColor: "#0288D1",
+            },
+
+            "&.Mui-focused fieldset": {
+              borderColor: "#0288D1",
+            },
+          }),
+          input: ({ theme }) => ({
+            color: theme.palette.mode === "light" ? "#01579B" : "#B3E5FC",
+
+            "&::placeholder": {
+              color: theme.palette.mode === "light" ? "rgba(0, 0, 0, 0.5)" : "rgba(255, 255, 255, 0.5)",
+              opacity: 1,
+            },
+          }),
+        },
+      },
+
+      // ✅ Лейблы для полей ввода
+      MuiInputLabel: {
+        styleOverrides: {
+          root: ({ theme }) => ({
+            color: theme.palette.mode === "light" ? "#01579B" : "#B3E5FC",
+
+            "&.Mui-focused": {
+              color: "#0288D1",
+            },
+          }),
+        },
+      },
+
+      // ✅ Общие лейблы форм
+      MuiFormLabel: {
+        styleOverrides: {
+          root: ({ theme }) => ({
+            color: theme.palette.mode === "light" ? "#01579B" : "#B3E5FC",
+          }),
+        },
+      },
+
+      // ✅ Иконка глаза
+      MuiIconButton: {
+        styleOverrides: {
+          root: ({ theme }) => ({
+            color: theme.palette.mode === "light" ? "#01579B" : "#B3E5FC",
+          }),
         },
       },
     },

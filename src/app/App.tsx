@@ -1,4 +1,3 @@
-// app/App.tsx
 import "./App.css"
 import { selectThemeMode, setIsLoggedInAC } from "@/app/app-slice"
 import { ErrorSnackbar, Header } from "@/common/components"
@@ -15,13 +14,9 @@ import styles from "./App.module.css"
 
 export const App = () => {
   const themeMode = useAppSelector(selectThemeMode)
-
   const [isInitialized, setIsInitialized] = useState(false)
-
   const { data, isLoading } = useMeQuery()
-
   const dispatch = useAppDispatch()
-
   const theme = getTheme(themeMode)
 
   useEffect(() => {

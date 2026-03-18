@@ -1,14 +1,9 @@
-import { selectThemeMode, setIsLoggedInAC } from "@/app/app-slice"
+import { setIsLoggedInAC } from "@/app/app-slice"
 import { ResultCode } from "@/common/enums"
-import { useAppDispatch, useAppSelector } from "@/common/hooks"
-import { getTheme } from "@/common/theme"
-
+import { useAppDispatch } from "@/common/hooks"
 import { useLoginMutation, useLazyGetCaptchaQuery } from "@/features/auth/api/authApi"
-
 import { type LoginInputs, loginSchema } from "@/features/auth/lib/schemas"
-
 import { zodResolver } from "@hookform/resolvers/zod"
-
 import Button from "@mui/material/Button"
 import Checkbox from "@mui/material/Checkbox"
 import FormControl from "@mui/material/FormControl"
@@ -16,23 +11,21 @@ import FormControlLabel from "@mui/material/FormControlLabel"
 import FormGroup from "@mui/material/FormGroup"
 import FormLabel from "@mui/material/FormLabel"
 import Grid from "@mui/material/Grid"
-import TextField from "@mui/material/TextField"
 import Alert from "@mui/material/Alert"
 import InputAdornment from "@mui/material/InputAdornment"
 import IconButton from "@mui/material/IconButton"
 import Visibility from "@mui/icons-material/Visibility"
 import VisibilityOff from "@mui/icons-material/VisibilityOff"
-
 import { Controller, type SubmitHandler, useForm } from "react-hook-form"
 import { useState } from "react"
-
+import { useTheme } from "@mui/material/styles"
+import { StyledTextField } from "./Login.styled"
 import styles from "./Login.module.css"
 
 export const Login = () => {
-  const themeMode = useAppSelector(selectThemeMode)
-  const theme = getTheme(themeMode)
-
   const dispatch = useAppDispatch()
+  const theme = useTheme()
+  const isLight = theme.palette.mode === "light"
 
   const [login] = useLoginMutation()
   const [getCaptcha] = useLazyGetCaptchaQuery()
@@ -55,10 +48,9 @@ export const Login = () => {
     formState: { errors },
   } = useForm<LoginInputs>({
     resolver: zodResolver(loginSchema),
-
     defaultValues: {
-      email: "",
-      password: "",
+      email: "free@samuraijs.com",
+      password: "free",
       rememberMe: false,
       captcha: "",
     },
@@ -70,7 +62,6 @@ export const Login = () => {
 
       if (res.resultCode === ResultCode.Success) {
         dispatch(setIsLoggedInAC({ isLoggedIn: true }))
-
         reset()
         setCaptchaUrl(null)
         setLoginError("")
@@ -94,12 +85,12 @@ export const Login = () => {
     <Grid container justifyContent="center">
       <form onSubmit={handleSubmit(onSubmit)} style={{ maxWidth: 400, width: "100%" }}>
         <FormControl fullWidth>
-          <FormLabel>
+          <FormLabel sx={{ color: isLight ? "#01579B" : "#B3E5FC" }}>
             <p>
               To login get registered
               <a
                 style={{
-                  color: theme.palette.primary.main,
+                  color: "#0288D1",
                   marginLeft: 5,
                 }}
                 href="https://social-network.samuraijs.com"
@@ -109,13 +100,10 @@ export const Login = () => {
                 here
               </a>
             </p>
-
             <p>or use common test account credentials:</p>
-
             <p>
               <b>Email:</b> free@samuraijs.com
             </p>
-
             <p>
               <b>Password:</b> free
             </p>
@@ -128,24 +116,35 @@ export const Login = () => {
           )}
 
           <FormGroup>
-            <TextField label="Email" margin="normal" error={!!errors.email} {...register("email")} />
+            {/* Email поле */}
+            <StyledTextField label="Email" margin="normal" error={!!errors.email} {...register("email")} />
 
             {errors.email && <span className={styles.errorMessage}>{errors.email.message}</span>}
 
-            <TextField
+            {/* Password поле с глазом */}
+            <StyledTextField
               type={showPassword ? "text" : "password"}
               label="Password"
               margin="normal"
               error={!!errors.password}
               {...register("password")}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={handleClickShowPassword} onMouseDown={handleMouseDownPassword} edge="end">
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={handleClickShowPassword}
+                        onMouseDown={handleMouseDownPassword}
+                        edge="end"
+                        sx={{
+                          color: isLight ? "#01579B" : "#B3E5FC",
+                        }}
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
               }}
             />
 
@@ -157,9 +156,20 @@ export const Login = () => {
                 <Controller
                   name="rememberMe"
                   control={control}
-                  render={({ field }) => <Checkbox {...field} checked={field.value} />}
+                  render={({ field }) => (
+                    <Checkbox
+                      {...field}
+                      checked={field.value}
+                      sx={{
+                        color: isLight ? "#01579B" : "#B3E5FC",
+                      }}
+                    />
+                  )}
                 />
               }
+              sx={{
+                color: isLight ? "#01579B" : "#B3E5FC",
+              }}
             />
 
             {captchaUrl && (
@@ -173,12 +183,11 @@ export const Login = () => {
                     width: "100%",
                   }}
                 />
-
-                <TextField label="Enter symbols" margin="normal" {...register("captcha")} />
+                <StyledTextField label="Enter symbols" margin="normal" {...register("captcha")} />
               </>
             )}
 
-            <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
+            <Button type="submit" variant="contained" sx={{ mt: 2 }}>
               Login
             </Button>
           </FormGroup>

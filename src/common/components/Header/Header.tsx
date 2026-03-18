@@ -1,10 +1,4 @@
-import {
-  changeThemeModeAC,
-  selectAppStatus,
-  selectIsLoggedIn,
-  selectThemeMode,
-  setIsLoggedInAC,
-} from "@/app/app-slice.ts"
+import { changeThemeModeAC, selectAppStatus, selectIsLoggedIn, selectThemeMode, setIsLoggedInAC } from "@/app/app-slice"
 import { baseApi } from "@/app/baseApi"
 import { NavButton } from "@/common/components/NavButton/NavButton"
 import { AUTH_TOKEN } from "@/common/constants"
@@ -25,11 +19,8 @@ export const Header = () => {
   const isLoggedIn = useAppSelector(selectIsLoggedIn)
   const themeMode = useAppSelector(selectThemeMode)
   const status = useAppSelector(selectAppStatus)
-
   const [logout] = useLogoutMutation()
-
   const dispatch = useAppDispatch()
-
   const theme = getTheme(themeMode)
 
   const changeMode = () => {
@@ -50,14 +41,7 @@ export const Header = () => {
   }
 
   return (
-    <AppBar
-      position="sticky"
-      sx={{
-        top: 0,
-        zIndex: (theme) => theme.zIndex.drawer + 1,
-        mb: "30px",
-      }}
-    >
+    <AppBar position="sticky" sx={{ top: 0, zIndex: (theme) => theme.zIndex.drawer + 1, mb: "30px" }}>
       <Toolbar>
         <Container maxWidth={"lg"} sx={containerSx}>
           <IconButton color="inherit">
