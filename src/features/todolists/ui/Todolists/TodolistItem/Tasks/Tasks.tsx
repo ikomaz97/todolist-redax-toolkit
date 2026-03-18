@@ -51,7 +51,6 @@ export const Tasks = ({ todolist }: Props) => {
     return <TasksSkeleton />
   }
 
-  // 👇 Цвета границ в зависимости от темы
   const borderColor = isLight ? "rgba(0, 0, 0, 0.23)" : "rgba(255, 255, 255, 0.23)"
 
   return (
@@ -66,10 +65,8 @@ export const Tasks = ({ todolist }: Props) => {
           display: "flex",
           flexDirection: "column",
           borderColor: borderColor,
-          // 👇 Убираем все внутренние отступы
           p: 0,
           m: 0,
-          // 👡 Скругление углов
           borderRadius: 1,
         }}
       >
@@ -93,20 +90,9 @@ export const Tasks = ({ todolist }: Props) => {
               sx={{
                 p: 0,
                 width: "100%",
-                // 👇 Убираем отступы у списка
                 "& .MuiListItem-root": {
                   py: 0,
                   px: 1,
-                },
-                // 👡 Первый элемент со скруглением сверху
-                "& .MuiListItem-root:first-of-type": {
-                  borderTopLeftRadius: 4,
-                  borderTopRightRadius: 4,
-                },
-                // 👡 Последний элемент со скруглением снизу
-                "& .MuiListItem-root:last-of-type": {
-                  borderBottomLeftRadius: 4,
-                  borderBottomRightRadius: 4,
                 },
               }}
             >
