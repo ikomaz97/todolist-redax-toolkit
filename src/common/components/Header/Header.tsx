@@ -14,6 +14,7 @@ import IconButton from "@mui/material/IconButton"
 import LinearProgress from "@mui/material/LinearProgress"
 import Switch from "@mui/material/Switch"
 import Toolbar from "@mui/material/Toolbar"
+import Box from "@mui/material/Box"
 
 export const Header = () => {
   const isLoggedIn = useAppSelector(selectIsLoggedIn)
@@ -41,7 +42,7 @@ export const Header = () => {
   }
 
   return (
-    <AppBar position="sticky" sx={{ top: 0, zIndex: (theme) => theme.zIndex.drawer + 1, mb: "30px" }}>
+    <AppBar position="sticky" sx={{ top: 0, zIndex: (theme) => theme.zIndex.drawer + 1 }}>
       <Toolbar>
         <Container maxWidth={"lg"} sx={containerSx}>
           <IconButton color="inherit">
@@ -54,7 +55,11 @@ export const Header = () => {
           </div>
         </Container>
       </Toolbar>
-      {status === "loading" && <LinearProgress />}
+
+      {/* 👇 Контейнер для полоски с фиксированной высотой */}
+      <Box sx={{ height: 4, width: "100%" }}>
+        {status === "loading" && <LinearProgress sx={{ position: "absolute", width: "100%" }} />}
+      </Box>
     </AppBar>
   )
 }
