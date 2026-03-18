@@ -81,6 +81,8 @@ export const TaskItem = ({ task, todolist, isLast }: Props) => {
 
   const isCompleted = task.status === TaskStatus.Completed
 
+  const borderColor = theme.palette.mode === "light" ? "rgba(0, 0, 0, 0.12)" : "rgba(255, 255, 255, 0.12)"
+
   return (
     <>
       <motion.div ref={setNodeRef} style={style} layout="position" whileHover={{ scale: 1.01 }}>
@@ -93,17 +95,18 @@ export const TaskItem = ({ task, todolist, isLast }: Props) => {
             justifyContent: "space-between",
             height: 48,
             px: 1,
-            borderTop: "1px solid",
-            borderLeft: "1px solid",
-            borderRight: "1px solid",
-            borderBottom: isLast ? "1px solid" : "none",
-            borderColor: theme.palette.divider,
+            // 👇 ИСПРАВЛЕНО: теперь одно свойство borderBottom с условием
+            borderBottom: isLast ? "none" : "1px solid",
+            borderBottomColor: borderColor,
             cursor: isDragging ? "grabbing" : "grab",
             backgroundColor: theme.palette.background.paper,
             opacity: isCompleted ? 0.5 : 1,
             "&:hover": {
               backgroundColor: theme.palette.action.hover,
             },
+            // 👇 Убираем все отступы
+            m: 0,
+            py: 0,
           }}
         >
           <Box
@@ -114,10 +117,40 @@ export const TaskItem = ({ task, todolist, isLast }: Props) => {
               minWidth: 0,
             }}
           >
-            <Checkbox checked={isCompleted} onChange={changeTaskStatus} size="small" sx={{ p: 0.5, mr: 1 }} />
-            <EditableSpan value={task.title} onChange={changeTaskTitle} maxDisplayLength={15} />
+            <Checkbox
+              checked={isCompleted}
+              onChange={changeTaskStatus}
+              size="small"
+              sx={{
+                p: 0.5,
+                mr: 1,
+                color: theme.palette.mode === "light" ? "#01579B" : "#B3E5FC",
+                "&.Mui-checked": {
+                  color: theme.palette.mode === "light" ? "#0288D1" : "#4EB5E5",
+                },
+              }}
+            />
+            <Box
+              sx={{
+                color: theme.palette.mode === "light" ? "#01579B" : "#B3E5FC",
+                textDecoration: isCompleted ? "line-through" : "none",
+                flex: 1,
+              }}
+            >
+              <EditableSpan value={task.title} onChange={changeTaskTitle} maxDisplayLength={15} />
+            </Box>
           </Box>
-          <IconButton onClick={deleteTask} size="small">
+          <IconButton
+            onClick={deleteTask}
+            size="small"
+            sx={{
+              color: theme.palette.mode === "light" ? "#01579B" : "#B3E5FC",
+              "&:hover": {
+                backgroundColor:
+                  theme.palette.mode === "light" ? "rgba(1, 87, 155, 0.04)" : "rgba(179, 229, 252, 0.08)",
+              },
+            }}
+          >
             <DeleteIcon fontSize="small" />
           </IconButton>
         </ListItem>
