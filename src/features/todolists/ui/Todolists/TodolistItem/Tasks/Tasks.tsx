@@ -2,7 +2,7 @@ import { useGetTasksQuery } from "@/features/todolists/api/tasksApi"
 import List from "@mui/material/List"
 import { TaskItem } from "./TaskItem/TaskItem"
 import { TasksSkeleton } from "./TasksSkeleton/TasksSkeleton"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import type { DomainTodolist } from "@/features/todolists/lib/types"
 import { TasksPagination } from "./TasksPagination"
 import { PAGE_SIZE } from "@/common/constants"
@@ -13,6 +13,10 @@ import Typography from "@mui/material/Typography"
 import Paper from "@mui/material/Paper"
 import { motion, AnimatePresence } from "framer-motion"
 import { useTheme } from "@mui/material/styles"
+import Checkbox from "@mui/material/Checkbox"
+import IconButton from "@mui/material/IconButton"
+import DeleteIcon from "@mui/icons-material/Delete"
+import { TaskStatus } from "@/common/enums"
 
 type Props = {
   todolist: DomainTodolist
@@ -27,6 +31,9 @@ export const Tasks = ({ todolist }: Props) => {
   const theme = useTheme()
   const isLight = theme.palette.mode === "light"
 
+  // 👇 Сохраняем ref для каждой задачи
+  const itemRefs = useRef<Record<string, HTMLDivElement | null>>({})
+
   const { data, isLoading, error } = useGetTasksQuery({
     todolistId: id,
     params: { page, count: PAGE_SIZE },
@@ -40,6 +47,65 @@ export const Tasks = ({ todolist }: Props) => {
     setPage,
     filter,
   })
+
+  // 👇 Функция для рендера оверлея при перетаскивании задачи
+  const renderTaskOverlay = (activeId: string) => {
+    const activeTask = data?.items.find((t) => t.id === activeId)
+    if (!activeTask) return null
+
+    // 👇 Получаем размеры исходного элемента
+    const activeElement = itemRefs.current[activeId]
+    const rect = activeElement?.getBoundingClientRect()
+    const isCompleted = activeTask.status === TaskStatus.Completed
+    const borderColor = theme.palette.mode === "light" ? "rgba(0, 0, 0, 0.12)" : "rgba(255, 255, 255, 0.23)"
+
+    return (
+      <Paper
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          height: rect ? `${rect.height}px` : 48,
+          width: rect ? `${rect.width}px` : "auto",
+          px: 1,
+          border: "1px solid",
+          borderColor: borderColor,
+          backgroundColor: theme.palette.background.paper,
+          opacity: 0.9,
+          boxShadow: 4,
+          borderRadius: 1,
+          boxSizing: "border-box",
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
+          <Checkbox
+            checked={isCompleted}
+            size="small"
+            sx={{
+              p: 0.5,
+              mr: 1,
+              color: theme.palette.mode === "light" ? "#01579B" : "#B3E5FC",
+              "&.Mui-checked": {
+                color: theme.palette.mode === "light" ? "#0288D1" : "#4EB5E5",
+              },
+            }}
+          />
+          <Box
+            sx={{
+              color: theme.palette.mode === "light" ? "#01579B" : "#B3E5FC",
+              textDecoration: isCompleted ? "line-through" : "none",
+              flex: 1,
+            }}
+          >
+            {activeTask.title}
+          </Box>
+        </Box>
+        <IconButton size="small" sx={{ visibility: "hidden" }}>
+          <DeleteIcon fontSize="small" />
+        </IconButton>
+      </Paper>
+    )
+  }
 
   const showPagination = (data?.totalCount || 0) > PAGE_SIZE
 
@@ -85,7 +151,11 @@ export const Tasks = ({ todolist }: Props) => {
             </Typography>
           </Box>
         ) : (
-          <DndContextWrapper items={taskIds} onDragEnd={handleDragEnd}>
+          <DndContextWrapper
+            items={taskIds}
+            onDragEnd={handleDragEnd}
+            renderOverlay={renderTaskOverlay} // 👈 ВАЖНО: передаем overlay для задач
+          >
             <List
               sx={{
                 p: 0,
@@ -105,6 +175,9 @@ export const Tasks = ({ todolist }: Props) => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 20 }}
                     transition={{ duration: 0.2 }}
+                    ref={(el) => {
+                      itemRefs.current[task.id] = el
+                    }} // 👈 Сохраняем ref
                   >
                     <TaskItem task={task} todolist={todolist} isLast={index === filteredTasks.length - 1} />
                   </motion.div>
