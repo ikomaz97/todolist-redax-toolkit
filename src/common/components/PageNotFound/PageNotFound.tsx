@@ -7,7 +7,7 @@ import styles from "./PageNotFound.module.css"
 export const PageNotFound = () => (
   <Container sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
 
-    <h2 className={styles.subtitle}>Пожалйста, авторизуйтесь</h2>
+    <h6 className={styles.subtitle}>Пожалйста, авторизуйтесь</h6>
     <Button variant="contained" component={Link} to={Path.Main} sx={{ width: "330px", mt: "20px" }}>
       Вернуться на страницу авторизации
     </Button>
