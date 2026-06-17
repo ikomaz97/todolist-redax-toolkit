@@ -51,9 +51,23 @@ const TasksComponent = ({ todolist }: Props) => {
     filter,
   })
 
+  // Создаём карту задач для быстрого поиска в renderTaskOverlay,
+  // не завися напрямую от порядка массива data?.items
+  const tasksMap = useCallback(
+    (items: DomainTask[]) => {
+      const map = new Map<string, DomainTask>()
+      items.forEach((task) => {
+        map.set(task.id, task)
+      })
+      return map
+    },
+    [],
+  )
+
   const renderTaskOverlay = useCallback(
     (activeId: string) => {
-      const activeTask = data?.items.find((t) => t.id === activeId)
+      const allTasks = data?.items || []
+      const activeTask = allTasks.find((t) => t.id === activeId)
       if (!activeTask) return null
 
       const activeElement = itemRefs.current[activeId]

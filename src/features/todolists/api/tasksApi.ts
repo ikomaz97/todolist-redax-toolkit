@@ -107,7 +107,6 @@ export const tasksApi = baseApi.injectEndpoints({
           tasksApi.util.updateQueryData("getTasks", targetArgs, (draft: GetTasksResponse) => {
             // Добавляем задачу только если есть место
             if (draft.items.length < PAGE_SIZE) {
-              // Создаем копию с title - используем тот же объект что на сервере
               draft.items.unshift(tempTask)
               draft.totalCount += 1
             } else {
@@ -120,16 +119,14 @@ export const tasksApi = baseApi.injectEndpoints({
         try {
           const { data } = await queryFulfilled
           if (data.data?.item) {
-            // Обновляем временную задачу реальными данными из сервера
-            // Используем Object.assign для обновления существующего объекта вместо замены
-            // Это предотвращает второй ререндер компонента TaskItem, т.к. ссылка остается той же
+            // Обновляем временную задачу реальными данными из сервера в ОДНОМ updateQueryData
+            // Это предотвращает ненужный ререндер, т.к. объект остаётся той же ссылкой
             dispatch(
               tasksApi.util.updateQueryData("getTasks", targetArgs, (draft: GetTasksResponse) => {
-                const task = draft.items.find((t: DomainTask) => t.id === tempId)
-                if (task) {
-                  // Object.assign обновляет свойства существующего объекта
-                  // React.memo не увидит изменения referential equality
-                  Object.assign(task, data.data!.item)
+                const taskIndex = draft.items.findIndex((t: DomainTask) => t.id === tempId)
+                if (taskIndex !== -1) {
+                  // Заменяем ссылку на новый объект с реальными данными с сервера
+                  draft.items[taskIndex] = data.data!.item
                 }
               }),
             )
