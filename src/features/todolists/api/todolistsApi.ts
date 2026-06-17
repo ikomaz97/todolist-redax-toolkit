@@ -42,6 +42,7 @@ export const todolistsApi = baseApi.injectEndpoints({
           patchResult.undo()
         }
       },
+      invalidatesTags: ["Todolist"],
     }),
 
     updateTodolistTitle: build.mutation<BaseResponse, { id: string; title: string }>({
@@ -66,6 +67,7 @@ export const todolistsApi = baseApi.injectEndpoints({
           patchResult.undo()
         }
       },
+      invalidatesTags: ["Todolist"],
     }),
 
     reorderTodolist: build.mutation<BaseResponse, { todolistId: string; putAfterItemId: string | null }>({
@@ -111,7 +113,8 @@ export const todolistsApi = baseApi.injectEndpoints({
           patchResult.undo()
         }
       },
-      // invalidatesTags: ["Todolist"],
+
+      invalidatesTags: ["Todolist"],
     }),
   }),
 })

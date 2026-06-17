@@ -89,7 +89,7 @@ export const tasksApi = baseApi.injectEndpoints({
 
         // Если целевая страница тоже полная, не добавляем задачу оптимистично
         if (isTargetPageFull && targetPage > currentPage) {
-          // Просто увеличиваем общее количество задач - компоненты page 2 не будут видеть эту задачу
+          // Просто увеличиваем общее количество задач
           dispatch(
             tasksApi.util.updateQueryData(
               "getTasks",
@@ -119,14 +119,12 @@ export const tasksApi = baseApi.injectEndpoints({
         try {
           const { data } = await queryFulfilled
           if (data.data?.item) {
-            // Обновляем временную задачу реальными данными из сервера в ОДНОМ updateQueryData
-            // Это предотвращает ненужный ререндер, т.к. объект остаётся той же ссылкой
+            // Заменяем временную задачу на реальную
             dispatch(
               tasksApi.util.updateQueryData("getTasks", targetArgs, (draft: GetTasksResponse) => {
-                const taskIndex = draft.items.findIndex((t: DomainTask) => t.id === tempId)
-                if (taskIndex !== -1) {
-                  // Заменяем ссылку на новый объект с реальными данными с сервера
-                  draft.items[taskIndex] = data.data!.item
+                const index = draft.items.findIndex((t: DomainTask) => t.id === tempId)
+                if (index !== -1) {
+                  draft.items[index] = data.data!.item
                 }
               }),
             )
@@ -137,6 +135,7 @@ export const tasksApi = baseApi.injectEndpoints({
         }
       },
 
+      invalidatesTags: (_res, _err, { todolistId }) => [{ type: "Task", id: todolistId }],
     }),
 
     removeTask: build.mutation<BaseResponse, { todolistId: string; taskId: string }>({
@@ -189,6 +188,7 @@ export const tasksApi = baseApi.injectEndpoints({
         }
       },
 
+      invalidatesTags: (_res, _err, { todolistId }) => [{ type: "Task", id: todolistId }],
     }),
 
     updateTask: build.mutation<
@@ -242,6 +242,7 @@ export const tasksApi = baseApi.injectEndpoints({
         }
       },
 
+      invalidatesTags: (_res, _err, { taskId }) => [{ type: "Task", id: taskId }],
     }),
 
     reorderTask: build.mutation<BaseResponse, { todolistId: string; taskId: string; putAfterItemId: string | null }>({
@@ -303,6 +304,7 @@ export const tasksApi = baseApi.injectEndpoints({
         }
       },
 
+      invalidatesTags: (_res, _err, { todolistId }) => [{ type: "Task", id: todolistId }],
     }),
   }),
 })

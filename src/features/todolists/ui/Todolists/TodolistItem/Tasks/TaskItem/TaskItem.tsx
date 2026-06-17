@@ -13,16 +13,19 @@ import { useTheme } from "@mui/material/styles"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { motion } from "framer-motion"
-import { memo, useState } from "react"
+import { useState } from "react"
 import Snackbar from "@mui/material/Snackbar"
 import Alert from "@mui/material/Alert"
 
 type Props = {
   task: DomainTask
   todolist: DomainTodolist
+  // 👇 Убираем isLast, так как он больше не нужен
+  // isLast?: boolean
 }
 
-const TaskItemComponent = ({ task, todolist }: Props) => {
+export const TaskItem = ({ task, todolist }: Props) => {
+  // 👈 Убираем isLast из пропсов
   const theme = useTheme()
   const [removeTask] = useRemoveTaskMutation()
   const [updateTask] = useUpdateTaskMutation()
@@ -95,6 +98,7 @@ const TaskItemComponent = ({ task, todolist }: Props) => {
             height: 48,
             px: 1,
             width: "100%",
+            // 👇 ВСЕ ЗАДАЧИ имеют только верхнюю границу (нижняя от контейнера)
             borderTop: "1px solid",
             borderTopColor: borderColor,
             borderLeft: "1px solid",
@@ -166,5 +170,3 @@ const TaskItemComponent = ({ task, todolist }: Props) => {
     </>
   )
 }
-
-export const TaskItem = memo(TaskItemComponent)

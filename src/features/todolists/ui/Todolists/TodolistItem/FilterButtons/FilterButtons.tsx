@@ -4,13 +4,12 @@ import { todolistsApi } from "@/features/todolists/api/todolistsApi"
 import type { DomainTodolist, FilterValues } from "@/features/todolists/lib/types"
 import Box from "@mui/material/Box"
 import Button from "@mui/material/Button"
-import { memo } from "react"
 
 type Props = {
   todolist: DomainTodolist
 }
 
-const FilterButtonsComponent = ({ todolist }: Props) => {
+export const FilterButtons = ({ todolist }: Props) => {
   const { id, filter } = todolist
 
   const dispatch = useAppDispatch()
@@ -78,5 +77,3 @@ const FilterButtonsComponent = ({ todolist }: Props) => {
     </Box>
   )
 }
-
-export const FilterButtons = memo(FilterButtonsComponent)

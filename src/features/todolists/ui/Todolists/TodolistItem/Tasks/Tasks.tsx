@@ -2,7 +2,7 @@ import { useGetTasksQuery } from "@/features/todolists/api/tasksApi"
 import List from "@mui/material/List"
 import { TaskItem } from "./TaskItem/TaskItem"
 import { TasksSkeleton } from "./TasksSkeleton/TasksSkeleton"
-import { useState, useRef, memo, useCallback } from "react"
+import { useState, useRef } from "react"
 import type { DomainTodolist } from "@/features/todolists/lib/types"
 import { TasksPagination } from "./TasksPagination"
 import { PAGE_SIZE } from "@/common/constants"
@@ -25,17 +25,13 @@ type Props = {
 const TASKS_CONTAINER_HEIGHT = 200
 const PAGINATION_HEIGHT = 40
 
-const TasksComponent = ({ todolist }: Props) => {
+export const Tasks = ({ todolist }: Props) => {
   const { id, filter } = todolist
   const [page, setPage] = useState(1)
   const theme = useTheme()
   const isLight = theme.palette.mode === "light"
 
-  // Стабилизируем ref-колбэк через useCallback, чтобы он не пересоздавался при каждом рендере
   const itemRefs = useRef<Record<string, HTMLDivElement | null>>({})
-  const setItemRef = useCallback((taskId: string) => (el: HTMLDivElement | null) => {
-    itemRefs.current[taskId] = el
-  }, [])
 
   const { data, isLoading, error } = useGetTasksQuery({
     todolistId: id,
@@ -51,84 +47,67 @@ const TasksComponent = ({ todolist }: Props) => {
     filter,
   })
 
-  // Создаём карту задач для быстрого поиска в renderTaskOverlay,
-  // не завися напрямую от порядка массива data?.items
-  const tasksMap = useCallback(
-    (items: DomainTask[]) => {
-      const map = new Map<string, DomainTask>()
-      items.forEach((task) => {
-        map.set(task.id, task)
-      })
-      return map
-    },
-    [],
-  )
+  const renderTaskOverlay = (activeId: string) => {
+    const activeTask = data?.items.find((t) => t.id === activeId)
+    if (!activeTask) return null
 
-  const renderTaskOverlay = useCallback(
-    (activeId: string) => {
-      const allTasks = data?.items || []
-      const activeTask = allTasks.find((t) => t.id === activeId)
-      if (!activeTask) return null
+    const activeElement = itemRefs.current[activeId]
+    const rect = activeElement?.getBoundingClientRect()
+    const isCompleted = activeTask.status === TaskStatus.Completed
+    const borderColor = theme.palette.mode === "light" ? "rgba(0, 0, 0, 0.12)" : "rgba(255, 255, 255, 0.23)"
 
-      const activeElement = itemRefs.current[activeId]
-      const rect = activeElement?.getBoundingClientRect()
-      const isCompleted = activeTask.status === TaskStatus.Completed
-      const borderColor = theme.palette.mode === "light" ? "rgba(0, 0, 0, 0.12)" : "rgba(255, 255, 255, 0.23)"
-
-      return (
-        <Paper
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            height: rect ? `${rect.height}px` : 48,
-            width: rect ? `${rect.width}px` : "100%",
-            px: 1,
-            borderTop: "1px solid",
-            borderTopColor: borderColor,
-            borderLeft: "1px solid",
-            borderLeftColor: borderColor,
-            borderRight: "1px solid",
-            borderRightColor: borderColor,
-            borderBottom: "none",
-            backgroundColor: theme.palette.background.paper,
-            opacity: 0.9,
-            boxShadow: 4,
-            borderRadius: 0,
-            boxSizing: "border-box",
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
-            <Checkbox
-              checked={isCompleted}
-              size="small"
-              sx={{
-                p: 0.5,
-                mr: 1,
-                color: theme.palette.mode === "light" ? "#01579B" : "#B3E5FC",
-                "&.Mui-checked": {
-                  color: theme.palette.mode === "light" ? "#0288D1" : "#4EB5E5",
-                },
-              }}
-            />
-            <Box
-              sx={{
-                color: theme.palette.mode === "light" ? "#01579B" : "#B3E5FC",
-                textDecoration: isCompleted ? "line-through" : "none",
-                flex: 1,
-              }}
-            >
-              {activeTask.title}
-            </Box>
+    return (
+      <Paper
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          height: rect ? `${rect.height}px` : 48,
+          width: rect ? `${rect.width}px` : "100%",
+          px: 1,
+          borderTop: "1px solid",
+          borderTopColor: borderColor,
+          borderLeft: "1px solid",
+          borderLeftColor: borderColor,
+          borderRight: "1px solid",
+          borderRightColor: borderColor,
+          borderBottom: "none",
+          backgroundColor: theme.palette.background.paper,
+          opacity: 0.9,
+          boxShadow: 4,
+          borderRadius: 0,
+          boxSizing: "border-box",
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
+          <Checkbox
+            checked={isCompleted}
+            size="small"
+            sx={{
+              p: 0.5,
+              mr: 1,
+              color: theme.palette.mode === "light" ? "#01579B" : "#B3E5FC",
+              "&.Mui-checked": {
+                color: theme.palette.mode === "light" ? "#0288D1" : "#4EB5E5",
+              },
+            }}
+          />
+          <Box
+            sx={{
+              color: theme.palette.mode === "light" ? "#01579B" : "#B3E5FC",
+              textDecoration: isCompleted ? "line-through" : "none",
+              flex: 1,
+            }}
+          >
+            {activeTask.title}
           </Box>
-          <IconButton size="small" sx={{ visibility: "hidden" }}>
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Paper>
-      )
-    },
-    [data?.items, theme],
-  )
+        </Box>
+        <IconButton size="small" sx={{ visibility: "hidden" }}>
+          <DeleteIcon fontSize="small" />
+        </IconButton>
+      </Paper>
+    )
+  }
 
   const showPagination = (data?.totalCount || 0) > PAGE_SIZE
 
@@ -202,7 +181,7 @@ const TasksComponent = ({ todolist }: Props) => {
                       exit={{ opacity: 0, y: 20 }}
                       transition={{ duration: 0.2 }}
                       ref={(el) => {
-                        setItemRef(task.id)(el)
+                        itemRefs.current[task.id] = el
                       }}
                       style={{ width: "100%" }}
                     >
@@ -233,5 +212,3 @@ const TasksComponent = ({ todolist }: Props) => {
     </Box>
   )
 }
-
-export const Tasks = memo(TasksComponent)

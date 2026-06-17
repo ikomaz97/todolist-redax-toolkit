@@ -1,14 +1,14 @@
 import {
   DndContext,
   closestCenter,
-  type DragEndEvent,
+  DragEndEvent,
   DragOverlay,
   useSensor,
   useSensors,
   PointerSensor,
 } from "@dnd-kit/core"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
-import { memo, type ReactNode, useState } from "react"
+import { ReactNode, useState } from "react"
 
 type Props = {
   items: string[]
@@ -17,7 +17,7 @@ type Props = {
   renderOverlay?: (activeId: string) => ReactNode
 }
 
-const DndContextWrapperComponent = ({ items, onDragEnd, children, renderOverlay }: Props) => {
+export const DndContextWrapper = ({ items, onDragEnd, children, renderOverlay }: Props) => {
   const [activeId, setActiveId] = useState<string | null>(null)
 
   const sensors = useSensors(
@@ -28,8 +28,8 @@ const DndContextWrapperComponent = ({ items, onDragEnd, children, renderOverlay 
     }),
   )
 
-  const handleDragStart = (event: DragEndEvent) => {
-    setActiveId(event.active.id as string)
+  const handleDragStart = (event: any) => {
+    setActiveId(event.active.id)
   }
 
   const handleDragEndWrapper = (event: DragEndEvent) => {
@@ -52,5 +52,3 @@ const DndContextWrapperComponent = ({ items, onDragEnd, children, renderOverlay 
     </DndContext>
   )
 }
-
-export const DndContextWrapper = memo(DndContextWrapperComponent)
