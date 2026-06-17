@@ -119,12 +119,14 @@ export const tasksApi = baseApi.injectEndpoints({
         try {
           const { data } = await queryFulfilled
           if (data.data?.item) {
-            // Заменяем временную задачу на реальную
+            // Обновляем временную задачу свойствами реальной, без замены объекта
             dispatch(
               tasksApi.util.updateQueryData("getTasks", targetArgs, (draft: GetTasksResponse) => {
-                const index = draft.items.findIndex((t: DomainTask) => t.id === tempId)
-                if (index !== -1) {
-                  draft.items[index] = data.data!.item
+                const task = draft.items.find((t: DomainTask) => t.id === tempId)
+                if (task) {
+                  // Используем Object.assign чтобы обновить существующий объект,
+                  // а не заменять его целиком - так не будет доп ререндера
+                  Object.assign(task, data.data!.item)
                 }
               }),
             )
@@ -135,7 +137,6 @@ export const tasksApi = baseApi.injectEndpoints({
         }
       },
 
-      invalidatesTags: (_res, _err, { todolistId }) => [{ type: "Task", id: todolistId }],
     }),
 
     removeTask: build.mutation<BaseResponse, { todolistId: string; taskId: string }>({
@@ -188,7 +189,6 @@ export const tasksApi = baseApi.injectEndpoints({
         }
       },
 
-      invalidatesTags: (_res, _err, { todolistId }) => [{ type: "Task", id: todolistId }],
     }),
 
     updateTask: build.mutation<
@@ -242,7 +242,6 @@ export const tasksApi = baseApi.injectEndpoints({
         }
       },
 
-      invalidatesTags: (_res, _err, { taskId }) => [{ type: "Task", id: taskId }],
     }),
 
     reorderTask: build.mutation<BaseResponse, { todolistId: string; taskId: string; putAfterItemId: string | null }>({
@@ -304,7 +303,6 @@ export const tasksApi = baseApi.injectEndpoints({
         }
       },
 
-      invalidatesTags: (_res, _err, { todolistId }) => [{ type: "Task", id: todolistId }],
     }),
   }),
 })

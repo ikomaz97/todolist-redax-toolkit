@@ -4,7 +4,7 @@ import { useAddTaskMutation } from "@/features/todolists/api/tasksApi"
 import type { DomainTodolist } from "@/features/todolists/lib/types"
 import Box from "@mui/material/Box"
 import Divider from "@mui/material/Divider"
-import { useState } from "react"
+import { useState, useCallback, memo } from "react"
 import { useGetTasksQuery } from "@/features/todolists/api/tasksApi"
 import { PAGE_SIZE } from "@/common/constants"
 import Snackbar from "@mui/material/Snackbar"
@@ -17,7 +17,7 @@ type Props = {
   todolist: DomainTodolist
 }
 
-export const TodolistItem = ({ todolist }: Props) => {
+const TodolistItemComponent = ({ todolist }: Props) => {
   const { id } = todolist
   const [addTask, { isLoading }] = useAddTaskMutation()
   const [snackbarOpen, setSnackbarOpen] = useState(false)
@@ -30,23 +30,30 @@ export const TodolistItem = ({ todolist }: Props) => {
   const currentTasksCount = data?.items.length || 0
   const isPageFull = currentTasksCount >= PAGE_SIZE
 
-  const createTask = async (title: string) => {
-    try {
-      const targetPage = isPageFull ? 2 : 1
+  const createTask = useCallback(
+    async (title: string) => {
+      try {
+        const targetPage = isPageFull ? 2 : 1
 
-      await addTask({
-        todolistId: id,
-        title,
-        currentPage: targetPage,
-      }).unwrap()
+        await addTask({
+          todolistId: id,
+          title,
+          currentPage: targetPage,
+        }).unwrap()
 
-      if (targetPage === 2) {
-        setSnackbarOpen(true)
+        if (targetPage === 2) {
+          setSnackbarOpen(true)
+        }
+      } catch (error) {
+        console.error("Failed to add task:", error)
       }
-    } catch (error) {
-      console.error("Failed to add task:", error)
-    }
-  }
+    },
+    [id, isPageFull, addTask],
+  )
+
+  const handleSnackbarClose = useCallback(() => {
+    setSnackbarOpen(false)
+  }, [])
 
   return (
     <Box
@@ -74,13 +81,15 @@ export const TodolistItem = ({ todolist }: Props) => {
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
-        onClose={() => setSnackbarOpen(false)}
+        onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert severity="info" onClose={() => setSnackbarOpen(false)}>
+        <Alert severity="info" onClose={handleSnackbarClose}>
           Page 1 is full. Task added to page 2.
         </Alert>
       </Snackbar>
     </Box>
   )
 }
+
+export const TodolistItem = memo(TodolistItemComponent)

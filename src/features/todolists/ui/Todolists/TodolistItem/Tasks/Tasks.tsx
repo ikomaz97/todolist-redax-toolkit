@@ -2,7 +2,7 @@ import { useGetTasksQuery } from "@/features/todolists/api/tasksApi"
 import List from "@mui/material/List"
 import { TaskItem } from "./TaskItem/TaskItem"
 import { TasksSkeleton } from "./TasksSkeleton/TasksSkeleton"
-import { useState, useRef } from "react"
+import { useState, useRef, memo, useCallback } from "react"
 import type { DomainTodolist } from "@/features/todolists/lib/types"
 import { TasksPagination } from "./TasksPagination"
 import { PAGE_SIZE } from "@/common/constants"
@@ -25,7 +25,7 @@ type Props = {
 const TASKS_CONTAINER_HEIGHT = 200
 const PAGINATION_HEIGHT = 40
 
-export const Tasks = ({ todolist }: Props) => {
+const TasksComponent = ({ todolist }: Props) => {
   const { id, filter } = todolist
   const [page, setPage] = useState(1)
   const theme = useTheme()
@@ -47,67 +47,70 @@ export const Tasks = ({ todolist }: Props) => {
     filter,
   })
 
-  const renderTaskOverlay = (activeId: string) => {
-    const activeTask = data?.items.find((t) => t.id === activeId)
-    if (!activeTask) return null
+  const renderTaskOverlay = useCallback(
+    (activeId: string) => {
+      const activeTask = data?.items.find((t) => t.id === activeId)
+      if (!activeTask) return null
 
-    const activeElement = itemRefs.current[activeId]
-    const rect = activeElement?.getBoundingClientRect()
-    const isCompleted = activeTask.status === TaskStatus.Completed
-    const borderColor = theme.palette.mode === "light" ? "rgba(0, 0, 0, 0.12)" : "rgba(255, 255, 255, 0.23)"
+      const activeElement = itemRefs.current[activeId]
+      const rect = activeElement?.getBoundingClientRect()
+      const isCompleted = activeTask.status === TaskStatus.Completed
+      const borderColor = theme.palette.mode === "light" ? "rgba(0, 0, 0, 0.12)" : "rgba(255, 255, 255, 0.23)"
 
-    return (
-      <Paper
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          height: rect ? `${rect.height}px` : 48,
-          width: rect ? `${rect.width}px` : "100%",
-          px: 1,
-          borderTop: "1px solid",
-          borderTopColor: borderColor,
-          borderLeft: "1px solid",
-          borderLeftColor: borderColor,
-          borderRight: "1px solid",
-          borderRightColor: borderColor,
-          borderBottom: "none",
-          backgroundColor: theme.palette.background.paper,
-          opacity: 0.9,
-          boxShadow: 4,
-          borderRadius: 0,
-          boxSizing: "border-box",
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
-          <Checkbox
-            checked={isCompleted}
-            size="small"
-            sx={{
-              p: 0.5,
-              mr: 1,
-              color: theme.palette.mode === "light" ? "#01579B" : "#B3E5FC",
-              "&.Mui-checked": {
-                color: theme.palette.mode === "light" ? "#0288D1" : "#4EB5E5",
-              },
-            }}
-          />
-          <Box
-            sx={{
-              color: theme.palette.mode === "light" ? "#01579B" : "#B3E5FC",
-              textDecoration: isCompleted ? "line-through" : "none",
-              flex: 1,
-            }}
-          >
-            {activeTask.title}
+      return (
+        <Paper
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            height: rect ? `${rect.height}px` : 48,
+            width: rect ? `${rect.width}px` : "100%",
+            px: 1,
+            borderTop: "1px solid",
+            borderTopColor: borderColor,
+            borderLeft: "1px solid",
+            borderLeftColor: borderColor,
+            borderRight: "1px solid",
+            borderRightColor: borderColor,
+            borderBottom: "none",
+            backgroundColor: theme.palette.background.paper,
+            opacity: 0.9,
+            boxShadow: 4,
+            borderRadius: 0,
+            boxSizing: "border-box",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
+            <Checkbox
+              checked={isCompleted}
+              size="small"
+              sx={{
+                p: 0.5,
+                mr: 1,
+                color: theme.palette.mode === "light" ? "#01579B" : "#B3E5FC",
+                "&.Mui-checked": {
+                  color: theme.palette.mode === "light" ? "#0288D1" : "#4EB5E5",
+                },
+              }}
+            />
+            <Box
+              sx={{
+                color: theme.palette.mode === "light" ? "#01579B" : "#B3E5FC",
+                textDecoration: isCompleted ? "line-through" : "none",
+                flex: 1,
+              }}
+            >
+              {activeTask.title}
+            </Box>
           </Box>
-        </Box>
-        <IconButton size="small" sx={{ visibility: "hidden" }}>
-          <DeleteIcon fontSize="small" />
-        </IconButton>
-      </Paper>
-    )
-  }
+          <IconButton size="small" sx={{ visibility: "hidden" }}>
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </Paper>
+      )
+    },
+    [data?.items, theme],
+  )
 
   const showPagination = (data?.totalCount || 0) > PAGE_SIZE
 
@@ -212,3 +215,5 @@ export const Tasks = ({ todolist }: Props) => {
     </Box>
   )
 }
+
+export const Tasks = memo(TasksComponent)
