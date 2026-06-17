@@ -31,7 +31,11 @@ const TasksComponent = ({ todolist }: Props) => {
   const theme = useTheme()
   const isLight = theme.palette.mode === "light"
 
+  // Стабилизируем ref-колбэк через useCallback, чтобы он не пересоздавался при каждом рендере
   const itemRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const setItemRef = useCallback((taskId: string) => (el: HTMLDivElement | null) => {
+    itemRefs.current[taskId] = el
+  }, [])
 
   const { data, isLoading, error } = useGetTasksQuery({
     todolistId: id,
@@ -184,7 +188,7 @@ const TasksComponent = ({ todolist }: Props) => {
                       exit={{ opacity: 0, y: 20 }}
                       transition={{ duration: 0.2 }}
                       ref={(el) => {
-                        itemRefs.current[task.id] = el
+                        setItemRef(task.id)(el)
                       }}
                       style={{ width: "100%" }}
                     >

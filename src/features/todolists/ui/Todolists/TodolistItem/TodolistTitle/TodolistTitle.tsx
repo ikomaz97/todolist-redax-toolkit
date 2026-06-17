@@ -1,16 +1,17 @@
-// features/todolists/ui/Todolists/TodolistTitle/TodolistTitle.tsx
+// features/todolists/ui/Todolists/TodolistItem/TodolistTitle/TodolistTitle.tsx
 import { EditableSpan } from "@/common/components/EditableSpan/EditableSpan"
 import { useRemoveTodolistMutation, useUpdateTodolistTitleMutation } from "@/features/todolists/api/todolistsApi"
 import type { DomainTodolist } from "@/features/todolists/lib/types"
 import DeleteIcon from "@mui/icons-material/Delete"
 import IconButton from "@mui/material/IconButton"
 import Box from "@mui/material/Box"
+import { memo } from "react"
 
 type Props = {
   todolist: DomainTodolist
 }
 
-export const TodolistTitle = ({ todolist }: Props) => {
+const TodolistTitleComponent = ({ todolist }: Props) => {
   const { id, title } = todolist
   const [removeTodolist] = useRemoveTodolistMutation()
   const [updateTodolistTitle] = useUpdateTodolistTitleMutation()
@@ -54,3 +55,5 @@ export const TodolistTitle = ({ todolist }: Props) => {
     </Box>
   )
 }
+
+export const TodolistTitle = memo(TodolistTitleComponent)

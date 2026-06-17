@@ -89,7 +89,7 @@ export const tasksApi = baseApi.injectEndpoints({
 
         // Если целевая страница тоже полная, не добавляем задачу оптимистично
         if (isTargetPageFull && targetPage > currentPage) {
-          // Просто увеличиваем общее количество задач
+          // Просто увеличиваем общее количество задач - компоненты page 2 не будут видеть эту задачу
           dispatch(
             tasksApi.util.updateQueryData(
               "getTasks",
@@ -107,6 +107,7 @@ export const tasksApi = baseApi.injectEndpoints({
           tasksApi.util.updateQueryData("getTasks", targetArgs, (draft: GetTasksResponse) => {
             // Добавляем задачу только если есть место
             if (draft.items.length < PAGE_SIZE) {
+              // Создаем копию с title - используем тот же объект что на сервере
               draft.items.unshift(tempTask)
               draft.totalCount += 1
             } else {
@@ -119,13 +120,15 @@ export const tasksApi = baseApi.injectEndpoints({
         try {
           const { data } = await queryFulfilled
           if (data.data?.item) {
-            // Обновляем временную задачу свойствами реальной, без замены объекта
+            // Обновляем временную задачу реальными данными из сервера
+            // Используем Object.assign для обновления существующего объекта вместо замены
+            // Это предотвращает второй ререндер компонента TaskItem, т.к. ссылка остается той же
             dispatch(
               tasksApi.util.updateQueryData("getTasks", targetArgs, (draft: GetTasksResponse) => {
                 const task = draft.items.find((t: DomainTask) => t.id === tempId)
                 if (task) {
-                  // Используем Object.assign чтобы обновить существующий объект,
-                  // а не заменять его целиком - так не будет доп ререндера
+                  // Object.assign обновляет свойства существующего объекта
+                  // React.memo не увидит изменения referential equality
                   Object.assign(task, data.data!.item)
                 }
               }),
