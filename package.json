@@ -1,7 +1,7 @@
 {
   "name": "todolist-redax-toolkit",
   "version": "0.0.0",
-  "homepage": "https://ikomaz97.github.io/todolist-redax-toolkit",
+  "homepage": "https://todolist-redax-toolkit.vercel.app",
   "type": "module",
   "scripts": {
     "dev": "vite --port 3000",
