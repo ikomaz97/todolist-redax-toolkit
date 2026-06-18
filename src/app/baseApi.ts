@@ -12,7 +12,7 @@ export const baseApi = createApi({
 
   baseQuery: async (args, api, extraOptions) => {
     const result = await fetchBaseQuery({
-      baseUrl: "/api/proxy",
+      baseUrl: "/api",
       // credentials и API-KEY теперь не нужны — прокси сам добавляет заголовки
 
       prepareHeaders: (headers) => {
