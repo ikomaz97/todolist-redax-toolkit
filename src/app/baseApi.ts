@@ -12,11 +12,8 @@ export const baseApi = createApi({
 
   baseQuery: async (args, api, extraOptions) => {
     const result = await fetchBaseQuery({
-      baseUrl: import.meta.env.VITE_BASE_URL,
-      credentials: "include",
-      headers: {
-        "API-KEY": import.meta.env.VITE_API_KEY,
-      },
+      baseUrl: "/api/proxy",
+      // credentials и API-KEY теперь не нужны — прокси сам добавляет заголовки
 
       prepareHeaders: (headers) => {
         const token = localStorage.getItem(AUTH_TOKEN)
