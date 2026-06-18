@@ -22,20 +22,35 @@ module.exports = async (req, res) => {
     }
 
     // Читаем тело запроса, если есть
-    let body
-    if (req.method !== 'GET' && req.method !== 'HEAD') {
-      body = await new Promise((resolve) => {
-        let data = ''
-        req.on('data', (chunk) => { data += chunk })
-        req.on('end', () => resolve(data || undefined))
-      })
-    }
+        // Vercel может отдать уже распарсенное тело через req.body или строку
+        let body
+        if (req.method !== 'GET' && req.method !== 'HEAD') {
+          if (req.body && typeof req.body === 'object') {
+            body = JSON.stringify(req.body)
+          } else if (req.body && typeof req.body === 'string') {
+            body = req.body
+          } else {
+            // Если тело не распарсено, читаем через stream
+            body = await new Promise((resolve) => {
+              let data = ''
+              req.on('data', (chunk) => { data += chunk })
+              req.on('end', () => resolve(data || undefined))
+            })
+          }
+        }
 
-    const response = await fetch(targetUrl, {
-      method: req.method,
-      headers,
-      body,
-    })
+        // Логируем для диагностики
+        console.log(`[Proxy] ${req.method} ${targetUrl} body:`, body ? body.substring(0, 100) : 'none')
+
+        const fetchOptions = {
+          method: req.method,
+          headers,
+        }
+        if (body) {
+          fetchOptions.body = body
+        }
+
+        const response = await fetch(targetUrl, fetchOptions)
 
     const text = await response.text()
     try {
