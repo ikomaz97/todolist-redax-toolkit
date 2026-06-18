@@ -5,24 +5,30 @@ const API_BASE = 'https://social-network.samuraijs.com/api/1.1'
 const API_KEY = '28d75e0b-b50c-4f2a-9805-5ee2b50ca199'
 
 module.exports = async (req, res) => {
-  // Формируем URL целевого API: /api/auth/me → /auth/me
-  const targetUrl = req.url.replace('/api', API_BASE)
-
-  // Формируем заголовки для запроса к целевому API
-  const headers = {
-    'Content-Type': 'application/json',
-    'API-KEY': API_KEY,
-  }
-
-  // Копируем Authorization заголовок, если он есть (токен авторизации)
-  if (req.headers.authorization) {
-    headers['Authorization'] = req.headers.authorization
-  }
-
   try {
+    // Формируем URL целевого API: /api/auth/me → /auth/me
+    const path = req.url.replace('/api', '')
+    const targetUrl = `${API_BASE}${path}`
+
+    // Формируем заголовки для запроса к целевому API
+    const headers = {
+      'Content-Type': 'application/json',
+      'API-KEY': API_KEY,
+    }
+
+    // Копируем Authorization заголовок, если он есть (токен авторизации)
+    if (req.headers.authorization) {
+      headers['Authorization'] = req.headers.authorization
+    }
+
+    // Читаем тело запроса, если есть
     let body
-    if (req.method !== 'GET' && req.method !== 'HEAD' && req.body) {
-      body = typeof req.body === 'string' ? req.body : JSON.stringify(req.body)
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      body = await new Promise((resolve) => {
+        let data = ''
+        req.on('data', (chunk) => { data += chunk })
+        req.on('end', () => resolve(data || undefined))
+      })
     }
 
     const response = await fetch(targetUrl, {
@@ -40,6 +46,6 @@ module.exports = async (req, res) => {
     }
   } catch (error) {
     console.error('Proxy error:', error)
-    res.status(500).json({ error: 'Proxy request failed', details: error.message })
+    res.status(500).json({ error: 'Proxy failed', details: error.message })
   }
 }
